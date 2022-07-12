@@ -1,0 +1,9 @@
+query SpellsQuery {
+  spells {
+    name
+    level
+    desc
+    url
+    index
+  }
+}

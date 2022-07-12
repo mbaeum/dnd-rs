@@ -1,0 +1,21 @@
+schema {
+  query: SpellByIndexQuery
+}
+
+type Spell {
+    name: String
+    level: Float!
+    desc: [String]
+    url: String
+    index: String
+    duration: String
+}
+
+type SpellByIndexQuery {
+  spells: [Spell!]!
+}
+
+input FilterFindManySpellInput {
+  index: String
+}
+
