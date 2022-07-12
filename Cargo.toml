@@ -1,0 +1,15 @@
+[package]
+name = "random-spells-cli"
+version = "0.1.0"
+edition = "2021"
+authors = ["Moritz Baumel <moritz.baeumel@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+keywords = ["cli", "dungeons and dragons", "random", "spells"]
+categories = ["command-line-utilities"]
+homepage = "https://github.com/mbaeum/random-spells-cli.git"
+repository = "https://github.com/mbaeum/random-spells-cli.git"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
