@@ -1,5 +1,5 @@
 schema {
-  query: SpellByIndexQuery
+  query: SpellsQuery
 }
 
 type Spell {
@@ -11,9 +11,10 @@ type Spell {
     duration: String
 }
 
-type SpellByIndexQuery {
-  spells: [Spell!]!
+type SpellsQuery {
+  spells(limit: Int): [Spell!]!
 }
+
 
 input FilterFindManySpellInput {
   index: String
