@@ -24,14 +24,14 @@ where
     }
 
     pub fn insert(&mut self, value: Vec<T>, key: Option<u8>) {
-        let key = key.unwrap_or_else(|| 0 as u8);
+        let key = key.unwrap_or(0_u8);
         let timed_value = value.clone();
         self.cache.insert(key, value);
         self.time_cache.insert(key, timed_value);
     }
 
     pub fn get(&mut self, key: Option<u8>) -> Option<Vec<T>> {
-        let key = key.unwrap_or_else(|| 0 as u8);
+        let key = key.unwrap_or(0_u8);
         match self.cache.get(&key) {
             Some(value) => Some(value.clone()),
             None => match { self.time_cache.get(&key) } {
@@ -45,8 +45,8 @@ where
     }
 
     pub fn get_recent(&mut self, key: Option<u8>) -> Option<&Vec<T>> {
-        let key = key.unwrap_or_else(|| 0 as u8);
-        self.time_cache.get(&key).clone()
+        let key = key.unwrap_or(0_u8);
+        self.time_cache.get(&key)
     }
 
     #[allow(dead_code)]
@@ -54,3 +54,6 @@ where
         todo!("persist to disk");
     }
 }
+
+#[cfg(test)]
+mod tests {}

@@ -30,11 +30,11 @@ impl GraphQLAPI {
         let request_body = <Query>::build_query(variables);
         let response = match client.post(&self.api_url).json(&request_body).send().await {
             Ok(res) => res,
-            Err(err) => return Err(GraphQLAPIError::ReqwestError(ReqwestError::from(err))),
+            Err(err) => return Err(GraphQLAPIError::ReqwestError(err)),
         };
         let response_body: Response<Query::ResponseData> = match response.json().await {
             Ok(response_body) => response_body,
-            Err(err) => return Err(GraphQLAPIError::ReqwestError(ReqwestError::from(err))),
+            Err(err) => return Err(GraphQLAPIError::ReqwestError(err)),
         };
         let data: Query::ResponseData = match response_body.data {
             Some(data) => data,

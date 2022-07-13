@@ -25,7 +25,7 @@ where
     T: SpellsDataSource,
 {
     pub fn new(datasource: T, cache_time: Option<u64>) -> Self {
-        let cache_time = cache_time.unwrap_or_else(|| 1000);
+        let cache_time = cache_time.unwrap_or(1000);
         let local_datasource = LocalDatasource::<SpellModel>::new(1, cache_time);
         Self {
             datasource,
