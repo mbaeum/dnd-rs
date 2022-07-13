@@ -25,11 +25,10 @@ impl SpellsGraphQLDataSource {
         }
     }
 
-    // TODO: Fetch more pages from api
     async fn get_all_raw_spells(
         &self,
     ) -> Result<spells_query::ResponseData, SpellsDataSourceError> {
-        let variables = spells_query::Variables {};
+        let variables = spells_query::Variables { limit: Some(0) };
         let response_data = self
             .api
             .get_response_data::<spells_query::Variables, spells_query::ResponseData, SpellsQuery>(

@@ -1,5 +1,5 @@
-query SpellsQuery {
-  spells {
+query SpellsQuery($limit: Int) {
+  spells(limit: $limit) {
     name
     level
     desc
