@@ -1,4 +1,3 @@
-// mod datasources;
 use crate::datasources::graphql_datasource::*;
 use crate::spells::spell_model::SpellModel;
 use crate::spells::spell_queries::{spells_query, SpellsQuery};
@@ -7,6 +6,7 @@ use futures::executor::block_on;
 #[derive(Debug)]
 pub enum SpellsDataSourceError {
     GraphQLError(GraphQLAPIError),
+    NoSpellsFound,
 }
 
 pub trait SpellsDataSource {
@@ -18,8 +18,6 @@ pub struct SpellsGraphQLDataSource {
     api: GraphQLAPI,
 }
 
-// impl GraphQLAPI for SpellsGraphQLDataSource {}
-
 impl SpellsGraphQLDataSource {
     pub fn new(api_url: String) -> Self {
         Self {
@@ -27,6 +25,7 @@ impl SpellsGraphQLDataSource {
         }
     }
 
+    // TODO: Fetch more pages from api
     async fn get_all_raw_spells(
         &self,
     ) -> Result<spells_query::ResponseData, SpellsDataSourceError> {
