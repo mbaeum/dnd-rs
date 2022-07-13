@@ -4,11 +4,11 @@ use std::fmt::Formatter;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct SpellModel {
-    name: Option<String>,
-    level: f64,
-    desc: Option<Vec<Option<String>>>,
-    url: Option<String>,
-    index: Option<String>,
+    pub name: Option<String>,
+    pub level: f64,
+    pub desc: Option<Vec<Option<String>>>,
+    pub url: Option<String>,
+    pub index: Option<String>,
 }
 
 impl SpellModel {

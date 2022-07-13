@@ -24,7 +24,7 @@ impl SpellsGraphQLDataSource {
     }
 
     fn make_variables(&self) -> spells_query::Variables {
-        spells_query::Variables { limit: Some(10) }
+        spells_query::Variables { limit: Some(0) }
     }
 
     async fn get_all_raw_spells(
