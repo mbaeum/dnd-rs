@@ -1,11 +1,11 @@
-use crate::datasources::graphql_datasource::*;
+use crate::datasources::remote_datasource::*;
 use crate::spells::spell_model::SpellModel;
 use crate::spells::spell_queries::{spells_query, SpellsQuery};
 use futures::executor::block_on;
 
 #[derive(Debug)]
 pub enum SpellsDataSourceError {
-    GraphQLError(GraphQLAPIError),
+    GraphQLError(APIError),
     NoSpellsFound,
 }
 
@@ -19,10 +19,8 @@ pub struct SpellsGraphQLDataSource {
 }
 
 impl SpellsGraphQLDataSource {
-    pub fn new(api_url: String) -> Self {
-        Self {
-            api: GraphQLAPI::new(api_url),
-        }
+    pub fn new(api: GraphQLAPI) -> Self {
+        Self { api }
     }
 
     fn make_variables(&self) -> spells_query::Variables {
@@ -56,5 +54,29 @@ impl SpellsDataSource for SpellsGraphQLDataSource {
                 SpellModel::new(spell.name, spell.level, spell.desc, spell.url, spell.index)
             })
             .collect::<Vec<SpellModel>>())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn data_source() -> SpellsGraphQLDataSource {
+        let api = GraphQLAPI::new("".to_string());
+        SpellsGraphQLDataSource::new(api)
+    }
+
+    #[test]
+    fn test_make_variables() {
+        let data_source = data_source();
+        let variables = data_source.make_variables();
+        assert_eq!(variables.limit, Some(10));
+    }
+
+    #[test]
+    fn test_get_from_invalid_url() {
+        let data_source = data_source();
+        let err = block_on(data_source.get_all_raw_spells());
+        assert!(err.is_err());
     }
 }

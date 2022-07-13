@@ -78,3 +78,54 @@ where
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::spells::spell_model::SpellModel;
+
+    fn default_spell_model() -> SpellModel {
+        SpellModel::new(
+            Some("default".to_string()),
+            1.3,
+            Some(vec![Some("default".to_string())]),
+            Some("default".to_string()),
+            Some("default-index".to_string()),
+        )
+    }
+
+    impl SpellsDataSource for LocalDatasource<SpellModel> {
+        /// implementing this here to that we can use it as mock
+        fn get_all_spells(&self) -> Result<Vec<SpellModel>, SpellsDataSourceError> {
+            Ok(vec![default_spell_model()])
+        }
+    }
+
+    fn make_repository() -> SpellRepository<LocalDatasource<SpellModel>> {
+        let datasource = LocalDatasource::<SpellModel>::new(1, 1000);
+        SpellRepository::new(datasource, None)
+    }
+
+    #[test]
+    fn test_get_all_spells_cache() {
+        let mut repository = make_repository();
+        let _ = repository.get_all_spells_and_cache();
+
+        assert_eq!(
+            repository.local_datasource.get(Some(0_u8)),
+            Some(vec![default_spell_model()])
+        );
+
+        assert_eq!(
+            repository.local_datasource.get_recent(Some(0_u8)),
+            Some(&vec![default_spell_model()])
+        );
+    }
+
+    #[test]
+    fn test_get_random_spell() {
+        let mut repository = make_repository();
+        let random_spell = repository.get_random_spell().unwrap();
+        assert_eq!(random_spell, default_spell_model());
+    }
+}

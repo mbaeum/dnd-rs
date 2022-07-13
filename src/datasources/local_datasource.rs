@@ -56,4 +56,36 @@ where
 }
 
 #[cfg(test)]
-mod tests {}
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_insert() {
+        let mut cache = LocalDatasource::<String>::new(1, 1000);
+        cache.insert(vec!["test".to_string()], None);
+        assert_eq!(cache.get(None), Some(vec!["test".to_string()]));
+    }
+
+    #[test]
+    fn test_get() {
+        let mut cache = LocalDatasource::<String>::new(1, 1000);
+        cache.insert(vec!["test".to_string()], None);
+        assert_eq!(cache.get(None), Some(vec!["test".to_string()]));
+        assert_eq!(cache.get(Some(0)), Some(vec!["test".to_string()]));
+    }
+
+    #[test]
+    fn test_get_recent() {
+        let mut cache = LocalDatasource::<String>::new(1, 1000);
+        cache.insert(vec!["test".to_string()], None);
+        assert_eq!(cache.get_recent(Some(0)), Some(&vec!["test".to_string()]));
+    }
+
+    #[test]
+    fn test_get_recent_expires() {
+        let mut cache = LocalDatasource::<String>::new(1, 2);
+        cache.insert(vec!["test".to_string()], None);
+        std::thread::sleep(Duration::from_millis(3));
+        assert_eq!(cache.get_recent(Some(0)), None);
+    }
+}

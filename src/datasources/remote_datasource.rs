@@ -4,8 +4,8 @@ use reqwest::Error as ReqwestError;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug)]
-pub enum GraphQLAPIError {
-    APIError(GraphQLError),
+pub enum APIError {
+    GraphQLAPIError(GraphQLError),
     ReqwestError(ReqwestError),
 }
 
@@ -25,21 +25,21 @@ impl GraphQLAPI {
     >(
         &self,
         variables: Ser,
-    ) -> Result<Query::ResponseData, GraphQLAPIError> {
+    ) -> Result<Query::ResponseData, APIError> {
         let client = reqwest::Client::new();
         let request_body = <Query>::build_query(variables);
         let response = match client.post(&self.api_url).json(&request_body).send().await {
             Ok(res) => res,
-            Err(err) => return Err(GraphQLAPIError::ReqwestError(err)),
+            Err(err) => return Err(APIError::ReqwestError(err)),
         };
         let response_body: Response<Query::ResponseData> = match response.json().await {
             Ok(response_body) => response_body,
-            Err(err) => return Err(GraphQLAPIError::ReqwestError(err)),
+            Err(err) => return Err(APIError::ReqwestError(err)),
         };
         let data: Query::ResponseData = match response_body.data {
             Some(data) => data,
             None => {
-                return Err(GraphQLAPIError::APIError(
+                return Err(APIError::GraphQLAPIError(
                     // in case of multiple errors reported, pick first
                     match response_body.errors {
                         Some(errors) => match errors.first() {
