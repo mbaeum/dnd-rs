@@ -70,7 +70,7 @@ mod tests {
     fn test_make_variables() {
         let data_source = data_source();
         let variables = data_source.make_variables();
-        assert_eq!(variables.limit, Some(10));
+        assert_eq!(variables.limit, Some(0));
     }
 
     #[test]
