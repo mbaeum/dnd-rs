@@ -13,6 +13,7 @@ async fn main() {
     let filters = SpellRepositoryFilters {
         min_level: None,
         max_level: None,
+        classes: Some(vec!["bard".to_string()]),
     };
     let api = GraphQLAPI::new(SPELLS_API_URL.to_string());
     let datasource = SpellsGraphQLDataSource::new(api);

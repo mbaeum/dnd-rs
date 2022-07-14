@@ -55,8 +55,8 @@ impl Display for SpellModel {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct AbilityScoreSkillsModel {
-    name: Option<String>,
-    index: Option<String>,
+    pub name: Option<String>,
+    pub index: Option<String>,
 }
 
 impl AbilityScoreSkillsModel {

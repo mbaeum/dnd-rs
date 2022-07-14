@@ -6,6 +6,7 @@ use rand::seq::SliceRandom;
 pub struct SpellRepositoryFilters {
     pub min_level: Option<f64>,
     pub max_level: Option<f64>,
+    pub classes: Option<Vec<String>>,
 }
 
 #[derive(Debug)]
@@ -86,6 +87,13 @@ where
                     true
                 }
             })
+            .filter(|spell| {
+                if let Some(classes) = &filters.classes {
+                    self.filter_spell_for_class(spell, classes)
+                } else {
+                    true
+                }
+            })
             .collect::<Vec<SpellModel>>()
         {
             f if f.is_empty() => Err(SpellRepositoryError::FilterError(
@@ -93,6 +101,15 @@ where
             )),
             f => Ok(f),
         }
+    }
+
+    fn filter_spell_for_class(&self, spell: &SpellModel, classes: &[String]) -> bool {
+        spell.classes.iter().flatten().any(|spell_class| {
+            classes.iter().any(|filter_class| -> bool {
+                spell_class.name == Some(filter_class.to_string())
+                    || spell_class.index == Some(filter_class.to_string())
+            })
+        })
     }
 }
 
@@ -176,6 +193,7 @@ mod tests {
         SpellRepositoryFilters {
             min_level: None,
             max_level: None,
+            classes: None,
         }
     }
 
@@ -263,9 +281,48 @@ mod tests {
         assert_eq!(filtered[0], dummy_multi_spell_model()[0]);
     }
     #[test]
-    fn test_bad_max_evel_filter_spells() {
+    fn test_bad_max_level_filter_spells() {
         let mut filters = dummy_repo_filters();
         filters.max_level = Some(0.0);
+        let mut repository = make_multi_spell_repository();
+
+        let spells = dummy_multi_spell_model();
+        let filtered = repository.filter_spells(spells, &filters);
+        assert!(filtered.is_err());
+    }
+    #[test]
+    fn test_classes_filter_spells() {
+        let mut filters = dummy_repo_filters();
+        filters.classes = Some(vec!["test_class3".to_string()]);
+        let mut repository = make_multi_spell_repository();
+
+        let spells = dummy_multi_spell_model();
+        let filtered = repository.filter_spells(spells, &filters).unwrap();
+        assert_eq!(filtered[0], dummy_multi_spell_model()[2]);
+    }
+    #[test]
+    fn test_multi_classes_filter_spells() {
+        let mut filters = dummy_repo_filters();
+        filters.classes = Some(vec!["test_class2".to_string(), "test_class3".to_string()]);
+        let mut repository = make_multi_spell_repository();
+
+        let spells = dummy_multi_spell_model();
+        let filtered = repository.filter_spells(spells, &filters).unwrap();
+        assert_eq!(filtered, dummy_multi_spell_model()[1..]);
+    }
+    #[test]
+    fn test_all_classes_filter_spells() {
+        let filters = dummy_repo_filters();
+        let mut repository = make_multi_spell_repository();
+
+        let spells = dummy_multi_spell_model();
+        let filtered = repository.filter_spells(spells, &filters).unwrap();
+        assert_eq!(filtered, dummy_multi_spell_model());
+    }
+    #[test]
+    fn test_bad_classes_filter_spells() {
+        let mut filters = dummy_repo_filters();
+        filters.classes = Some(vec!["test_class4".to_string()]);
         let mut repository = make_multi_spell_repository();
 
         let spells = dummy_multi_spell_model();
