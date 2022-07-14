@@ -1,4 +1,4 @@
-use super::spell_model::{AbilityScoreSkillsModel, SpellModel};
+use super::spell_queries::spells_query::SpellsQuerySpells;
 use super::spell_queries::{spells_query, SpellsQuery};
 use crate::datasources::remote_datasource::*;
 use futures::executor::block_on;
@@ -10,7 +10,7 @@ pub enum SpellsDataSourceError {
 }
 
 pub trait SpellsDataSource {
-    fn get_all_spells(&self) -> Result<Vec<SpellModel>, SpellsDataSourceError>;
+    fn get_all_spells(&self) -> Result<Vec<SpellsQuerySpells>, SpellsDataSourceError>;
 }
 
 #[derive(Debug)]
@@ -42,45 +42,13 @@ impl SpellsGraphQLDataSource {
             Err(err) => Err(SpellsDataSourceError::GraphQLError(err)),
         }
     }
-
-    fn spell_query_classes_to_model(
-        &self,
-        classes: Option<Vec<Option<spells_query::SpellsQuerySpellsClasses>>>,
-    ) -> Option<Vec<AbilityScoreSkillsModel>> {
-        classes.map(|classes| {
-            classes
-                .into_iter()
-                .flatten()
-                .map(|class| AbilityScoreSkillsModel::new(class.name, class.index))
-                .collect()
-        })
-    }
-
-    fn spell_query_to_model(
-        &self,
-        spells: Vec<spells_query::SpellsQuerySpells>,
-    ) -> Vec<SpellModel> {
-        spells
-            .into_iter()
-            .map(|spell| -> SpellModel {
-                SpellModel::new(
-                    spell.name,
-                    spell.level,
-                    spell.desc,
-                    spell.url,
-                    spell.index,
-                    self.spell_query_classes_to_model(spell.classes),
-                )
-            })
-            .collect::<Vec<SpellModel>>()
-    }
 }
 
 impl SpellsDataSource for SpellsGraphQLDataSource {
-    fn get_all_spells(&self) -> Result<Vec<SpellModel>, SpellsDataSourceError> {
+    fn get_all_spells(&self) -> Result<Vec<SpellsQuerySpells>, SpellsDataSourceError> {
         let data = block_on(self.get_all_raw_spells());
         let spells = data?.spells;
-        Ok(self.spell_query_to_model(spells))
+        Ok(spells)
     }
 }
 
