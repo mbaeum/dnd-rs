@@ -1,4 +1,4 @@
-use super::spell_model::SpellModel;
+use super::spell_queries::spells_query::SpellsQuerySpells;
 use super::spells_datasource::{SpellsDataSource, SpellsDataSourceError};
 use crate::datasources::local_datasource::LocalDatasource;
 use rand::seq::SliceRandom;
@@ -19,7 +19,7 @@ pub trait TraitSpellRepository {
     fn get_random_spell(
         &mut self,
         filters: &SpellRepositoryFilters,
-    ) -> Result<SpellModel, SpellRepositoryError>;
+    ) -> Result<SpellsQuerySpells, SpellRepositoryError>;
 }
 
 pub struct SpellRepository<T>
@@ -27,7 +27,7 @@ where
     T: SpellsDataSource,
 {
     datasource: T,
-    local_datasource: LocalDatasource<SpellModel>,
+    local_datasource: LocalDatasource<SpellsQuerySpells>,
 }
 
 impl<T> SpellRepository<T>
@@ -36,14 +36,14 @@ where
 {
     pub fn new(datasource: T, cache_time: Option<u64>) -> Self {
         let cache_time = cache_time.unwrap_or(1000);
-        let local_datasource = LocalDatasource::<SpellModel>::new(2, cache_time);
+        let local_datasource = LocalDatasource::<SpellsQuerySpells>::new(2, cache_time);
         Self {
             datasource,
             local_datasource,
         }
     }
 
-    fn get_all_spells_and_cache(&mut self) -> Result<Vec<SpellModel>, SpellRepositoryError> {
+    fn get_all_spells_and_cache(&mut self) -> Result<Vec<SpellsQuerySpells>, SpellRepositoryError> {
         //try timed cache before making api call
         match self.local_datasource.get_recent(0_u8) {
             Some(spells) => Ok(spells.to_vec()),
@@ -52,25 +52,25 @@ where
                 match self.datasource.get_all_spells() {
                     Ok(spells) => {
                         //store in local cache
-                        let cache_spells = spells.clone();
+                        let cache_spells = spells.clone(); //.into_iter().map(|x| x).collect();
                         self.local_datasource.insert(cache_spells, 0_u8);
                         Ok(spells)
                     }
-                    //on network failure, try permamnent cache
-                    Err(e) => match self.local_datasource.get(0_u8) {
-                        Some(spells) => Ok(spells),
-                        None => Err(SpellRepositoryError::DataSourceError(e)),
-                    },
-                }
+                    Err(e) => Err(SpellRepositoryError::DataSourceError(e))
+                    //on network failure, try permamnent cache (don't know how to implement this yet)
+                    // match self.local_datasource.get(0_u8) {
+                    //     Some(spells) => Ok(spells),
+                    //     None => Err(SpellRepositoryError::DataSourceError(e)),
+                    }
             }
         }
     }
 
     fn filter_spells(
         &mut self,
-        spells: Vec<SpellModel>,
+        spells: Vec<SpellsQuerySpells>,
         filters: &SpellRepositoryFilters,
-    ) -> Result<Vec<SpellModel>, SpellRepositoryError> {
+    ) -> Result<Vec<SpellsQuerySpells>, SpellRepositoryError> {
         match spells
             .into_iter()
             .filter(|spell| {
@@ -94,7 +94,9 @@ where
                     true
                 }
             })
-            .collect::<Vec<SpellModel>>()
+            // .map(|spell| spell.clone())
+            // .cloned()
+            .collect::<Vec<SpellsQuerySpells>>()
         {
             f if f.is_empty() => Err(SpellRepositoryError::FilterError(
                 "No spells found".to_string(),
@@ -103,11 +105,16 @@ where
         }
     }
 
-    fn filter_spell_for_classes(&self, spell: &SpellModel, classes: &[String]) -> bool {
+    fn filter_spell_for_classes(&self, spell: &SpellsQuerySpells, classes: &[String]) -> bool {
         spell.classes.iter().flatten().any(|spell_class| {
             classes.iter().any(|filter_class| -> bool {
-                spell_class.name == Some(filter_class.to_string())
-                    || spell_class.index == Some(filter_class.to_string())
+                match spell_class {
+                    Some(spell_class) => {
+                        spell_class.name == Some(filter_class.to_string())
+                            || spell_class.index == Some(filter_class.to_string())
+                    }
+                    None => false,
+                }
             })
         })
     }
@@ -120,7 +127,7 @@ where
     fn get_random_spell(
         &mut self,
         filters: &SpellRepositoryFilters,
-    ) -> Result<SpellModel, SpellRepositoryError> {
+    ) -> Result<SpellsQuerySpells, SpellRepositoryError> {
         let cached_spells = self.get_all_spells_and_cache();
         match cached_spells {
             Ok(spells) => {
@@ -143,49 +150,52 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::spells::spell_model::{AbilityScoreSkillsModel, SpellModel};
+    use crate::spells::spell_queries::spells_query::{SpellsQuerySpells, SpellsQuerySpellsClasses};
 
-    fn dummy_ability_score(name: &str) -> AbilityScoreSkillsModel {
-        AbilityScoreSkillsModel::new(Some(name.to_string()), Some(name.to_string()))
+    fn dummy_ability_score(name: &str) -> Option<SpellsQuerySpellsClasses> {
+        Some(SpellsQuerySpellsClasses {
+            name: Some(name.to_string()),
+            index: Some(name.to_string()),
+        })
     }
 
-    fn dummy_spell_model() -> Vec<SpellModel> {
-        vec![SpellModel::new(
-            Some("default".to_string()),
-            1.3,
-            Some(vec![Some("default".to_string())]),
-            Some("default".to_string()),
-            Some("default-index".to_string()),
-            None,
-        )]
+    fn dummy_spell_model() -> Vec<SpellsQuerySpells> {
+        vec![SpellsQuerySpells {
+            name: Some("default".to_string()),
+            level: 1.3,
+            desc: Some(vec![Some("default".to_string())]),
+            url: Some("default".to_string()),
+            index: Some("default-index".to_string()),
+            classes: None,
+        }]
     }
 
-    fn dummy_multi_spell_model() -> Vec<SpellModel> {
+    fn dummy_multi_spell_model() -> Vec<SpellsQuerySpells> {
         vec![
-            SpellModel::new(
-                Some("default".to_string()),
-                1.0,
-                Some(vec![Some("default".to_string())]),
-                Some("default".to_string()),
-                Some("default-index".to_string()),
-                Some(vec![dummy_ability_score("test_class1")]),
-            ),
-            SpellModel::new(
-                Some("default".to_string()),
-                2.0,
-                Some(vec![Some("default".to_string())]),
-                Some("default".to_string()),
-                Some("default-index".to_string()),
-                Some(vec![dummy_ability_score("test_class2")]),
-            ),
-            SpellModel::new(
-                Some("default".to_string()),
-                3.0,
-                Some(vec![Some("default".to_string())]),
-                Some("default".to_string()),
-                Some("default-index".to_string()),
-                Some(vec![dummy_ability_score("test_class3")]),
-            ),
+            SpellsQuerySpells {
+                name: Some("default1".to_string()),
+                level: 1.0,
+                desc: Some(vec![Some("default".to_string())]),
+                url: Some("default".to_string()),
+                index: Some("default-index".to_string()),
+                classes: Some(vec![dummy_ability_score("test_class1")]),
+            },
+            SpellsQuerySpells {
+                name: Some("default2".to_string()),
+                level: 2.0,
+                desc: Some(vec![Some("default".to_string())]),
+                url: Some("default".to_string()),
+                index: Some("default-index".to_string()),
+                classes: Some(vec![dummy_ability_score("test_class2")]),
+            },
+            SpellsQuerySpells {
+                name: Some("default3".to_string()),
+                level: 3.0,
+                desc: Some(vec![Some("default".to_string())]),
+                url: Some("default".to_string()),
+                index: Some("default-index".to_string()),
+                classes: Some(vec![dummy_ability_score("test_class3")]),
+            },
         ]
     }
 
@@ -201,7 +211,7 @@ mod tests {
 
     impl SpellsDataSource for SingeSpellDataSourceMock {
         /// implementing this here to that we can use it as mock
-        fn get_all_spells(&self) -> Result<Vec<SpellModel>, SpellsDataSourceError> {
+        fn get_all_spells(&self) -> Result<Vec<SpellsQuerySpells>, SpellsDataSourceError> {
             Ok(dummy_spell_model())
         }
     }
@@ -215,7 +225,7 @@ mod tests {
 
     impl SpellsDataSource for MultiSpellDataSourceMock {
         /// implementing this here to that we can use it as mock
-        fn get_all_spells(&self) -> Result<Vec<SpellModel>, SpellsDataSourceError> {
+        fn get_all_spells(&self) -> Result<Vec<SpellsQuerySpells>, SpellsDataSourceError> {
             Ok(dummy_multi_spell_model())
         }
     }
@@ -231,13 +241,13 @@ mod tests {
         let _ = repository.get_all_spells_and_cache();
 
         assert_eq!(
-            repository.local_datasource.get(0_u8),
-            Some(dummy_spell_model())
+            repository.local_datasource.get(0_u8).unwrap()[0].name,
+            Some("default".to_string())
         );
 
         assert_eq!(
-            repository.local_datasource.get_recent(0_u8),
-            Some(&dummy_spell_model())
+            repository.local_datasource.get_recent(0_u8).unwrap()[0].name,
+            Some("default".to_string())
         );
     }
 
@@ -246,7 +256,7 @@ mod tests {
         let filters = dummy_repo_filters();
         let mut repository = make_single_spell_repository();
         let random_spell = repository.get_random_spell(&filters).unwrap();
-        assert_eq!(random_spell, dummy_spell_model()[0]);
+        assert_eq!(random_spell.name, Some("default".to_string()));
     }
 
     #[test]
@@ -257,7 +267,7 @@ mod tests {
 
         let spells = dummy_multi_spell_model();
         let filtered = repository.filter_spells(spells, &filters).unwrap();
-        assert_eq!(filtered[0], dummy_multi_spell_model()[2]);
+        assert_eq!(filtered[0].name, Some("default3".to_string()));
     }
     #[test]
     fn test_bad_min_level_filter_spells() {
@@ -278,7 +288,7 @@ mod tests {
 
         let spells = dummy_multi_spell_model();
         let filtered = repository.filter_spells(spells, &filters).unwrap();
-        assert_eq!(filtered[0], dummy_multi_spell_model()[0]);
+        assert_eq!(filtered[0].name, Some("default1".to_string()));
     }
     #[test]
     fn test_bad_max_level_filter_spells() {
@@ -298,7 +308,7 @@ mod tests {
 
         let spells = dummy_multi_spell_model();
         let filtered = repository.filter_spells(spells, &filters).unwrap();
-        assert_eq!(filtered[0], dummy_multi_spell_model()[2]);
+        assert_eq!(filtered[0].name, Some("default3".to_string()));
     }
     #[test]
     fn test_multi_classes_filter_spells() {
@@ -308,7 +318,13 @@ mod tests {
 
         let spells = dummy_multi_spell_model();
         let filtered = repository.filter_spells(spells, &filters).unwrap();
-        assert_eq!(filtered, dummy_multi_spell_model()[1..]);
+        assert_eq!(
+            filtered
+                .into_iter()
+                .map(|x| x.name)
+                .collect::<Vec<Option<String>>>(),
+            vec![Some("default2".to_string()), Some("default3".to_string())]
+        );
     }
     #[test]
     fn test_all_classes_filter_spells() {
@@ -317,7 +333,17 @@ mod tests {
 
         let spells = dummy_multi_spell_model();
         let filtered = repository.filter_spells(spells, &filters).unwrap();
-        assert_eq!(filtered, dummy_multi_spell_model());
+        assert_eq!(
+            filtered
+                .into_iter()
+                .map(|x| x.name)
+                .collect::<Vec<Option<String>>>(),
+            vec![
+                Some("default1".to_string()),
+                Some("default2".to_string()),
+                Some("default3".to_string())
+            ]
+        );
     }
     #[test]
     fn test_bad_classes_filter_spells() {

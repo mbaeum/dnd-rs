@@ -1,49 +1,42 @@
 use lru_time_cache::LruCache;
 use std::fmt::Debug;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 #[derive(Clone)]
-pub struct LocalDatasource<T: Clone> {
+pub struct LocalDatasource<T> {
     cache: LruCache<u8, Vec<T>>,
-    time_cache: LruCache<u8, Vec<T>>,
+    expiry_cache: LruCache<u8, Option<Instant>>,
 }
 
 impl<T> LocalDatasource<T>
 where
-    T: Clone + Debug,
+    T: Debug,
 {
     pub fn new(capacity: usize, duration: u64) -> Self {
-        let expiry_duration = Duration::from_millis(duration);
+        let expiry_date = Instant::now().checked_add(Duration::from_millis(duration));
+        let mut expiry_cache = LruCache::<u8, Option<Instant>>::with_capacity(1);
+        expiry_cache.insert(0, expiry_date);
         Self {
             cache: LruCache::<u8, Vec<T>>::with_capacity(capacity),
-            time_cache: LruCache::<u8, Vec<T>>::with_expiry_duration_and_capacity(
-                expiry_duration,
-                capacity,
-            ),
+            expiry_cache,
         }
     }
 
     pub fn insert(&mut self, value: Vec<T>, key: u8) {
-        let timed_value = value.clone();
         self.cache.insert(key, value);
-        self.time_cache.insert(key, timed_value);
     }
 
-    pub fn get(&mut self, key: u8) -> Option<Vec<T>> {
-        match self.cache.get(&key) {
-            Some(value) => Some(value.clone()),
-            None => match { self.time_cache.get(&key) } {
-                Some(value) => {
-                    self.cache.insert(key, value.clone());
-                    Some(value.clone())
-                }
-                None => None,
-            },
-        }
+    pub fn get(&mut self, key: u8) -> Option<&Vec<T>> {
+        self.cache.get(&key)
     }
 
     pub fn get_recent(&mut self, key: u8) -> Option<&Vec<T>> {
-        self.time_cache.get(&key)
+        let now = Instant::now();
+        if now <= self.expiry_cache.get(&0_u8)?.unwrap() {
+            self.cache.get(&key)
+        } else {
+            None
+        }
     }
 
     #[allow(dead_code)]
@@ -60,15 +53,15 @@ mod tests {
     fn test_insert() {
         let mut cache = LocalDatasource::<String>::new(1, 1000);
         cache.insert(vec!["test".to_string()], 0_u8);
-        assert_eq!(cache.get(0_u8), Some(vec!["test".to_string()]));
+        assert_eq!(cache.get(0_u8), Some(&vec!["test".to_string()]));
     }
 
     #[test]
     fn test_get() {
         let mut cache = LocalDatasource::<String>::new(1, 1000);
         cache.insert(vec!["test".to_string()], 0_u8);
-        assert_eq!(cache.get(0_u8), Some(vec!["test".to_string()]));
-        assert_eq!(cache.get(0_u8), Some(vec!["test".to_string()]));
+        assert_eq!(cache.get(0_u8), Some(&vec!["test".to_string()]));
+        assert_eq!(cache.get(0_u8), Some(&vec!["test".to_string()]));
     }
 
     #[test]
