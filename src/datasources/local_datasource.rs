@@ -23,15 +23,13 @@ where
         }
     }
 
-    pub fn insert(&mut self, value: Vec<T>, key: Option<u8>) {
-        let key = key.unwrap_or(0_u8);
+    pub fn insert(&mut self, value: Vec<T>, key: u8) {
         let timed_value = value.clone();
         self.cache.insert(key, value);
         self.time_cache.insert(key, timed_value);
     }
 
-    pub fn get(&mut self, key: Option<u8>) -> Option<Vec<T>> {
-        let key = key.unwrap_or(0_u8);
+    pub fn get(&mut self, key: u8) -> Option<Vec<T>> {
         match self.cache.get(&key) {
             Some(value) => Some(value.clone()),
             None => match { self.time_cache.get(&key) } {
@@ -44,8 +42,7 @@ where
         }
     }
 
-    pub fn get_recent(&mut self, key: Option<u8>) -> Option<&Vec<T>> {
-        let key = key.unwrap_or(0_u8);
+    pub fn get_recent(&mut self, key: u8) -> Option<&Vec<T>> {
         self.time_cache.get(&key)
     }
 
@@ -62,30 +59,30 @@ mod tests {
     #[test]
     fn test_insert() {
         let mut cache = LocalDatasource::<String>::new(1, 1000);
-        cache.insert(vec!["test".to_string()], None);
-        assert_eq!(cache.get(None), Some(vec!["test".to_string()]));
+        cache.insert(vec!["test".to_string()], 0_u8);
+        assert_eq!(cache.get(0_u8), Some(vec!["test".to_string()]));
     }
 
     #[test]
     fn test_get() {
         let mut cache = LocalDatasource::<String>::new(1, 1000);
-        cache.insert(vec!["test".to_string()], None);
-        assert_eq!(cache.get(None), Some(vec!["test".to_string()]));
-        assert_eq!(cache.get(Some(0)), Some(vec!["test".to_string()]));
+        cache.insert(vec!["test".to_string()], 0_u8);
+        assert_eq!(cache.get(0_u8), Some(vec!["test".to_string()]));
+        assert_eq!(cache.get(0_u8), Some(vec!["test".to_string()]));
     }
 
     #[test]
     fn test_get_recent() {
         let mut cache = LocalDatasource::<String>::new(1, 1000);
-        cache.insert(vec!["test".to_string()], None);
-        assert_eq!(cache.get_recent(Some(0)), Some(&vec!["test".to_string()]));
+        cache.insert(vec!["test".to_string()], 0_u8);
+        assert_eq!(cache.get_recent(0_u8), Some(&vec!["test".to_string()]));
     }
 
     #[test]
     fn test_get_recent_expires() {
         let mut cache = LocalDatasource::<String>::new(1, 2);
-        cache.insert(vec!["test".to_string()], None);
+        cache.insert(vec!["test".to_string()], 0_u8);
         std::thread::sleep(Duration::from_millis(3));
-        assert_eq!(cache.get_recent(Some(0)), None);
+        assert_eq!(cache.get_recent(0_u8), None);
     }
 }

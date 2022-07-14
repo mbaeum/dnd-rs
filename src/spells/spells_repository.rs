@@ -35,7 +35,7 @@ where
 {
     pub fn new(datasource: T, cache_time: Option<u64>) -> Self {
         let cache_time = cache_time.unwrap_or(1000);
-        let local_datasource = LocalDatasource::<SpellModel>::new(1, cache_time);
+        let local_datasource = LocalDatasource::<SpellModel>::new(2, cache_time);
         Self {
             datasource,
             local_datasource,
@@ -44,7 +44,7 @@ where
 
     fn get_all_spells_and_cache(&mut self) -> Result<Vec<SpellModel>, SpellRepositoryError> {
         //try timed cache before making api call
-        match self.local_datasource.get_recent(None) {
+        match self.local_datasource.get_recent(0_u8) {
             Some(spells) => Ok(spells.to_vec()),
             None => {
                 //make api call
@@ -52,11 +52,11 @@ where
                     Ok(spells) => {
                         //store in local cache
                         let cache_spells = spells.clone();
-                        self.local_datasource.insert(cache_spells, None);
+                        self.local_datasource.insert(cache_spells, 0_u8);
                         Ok(spells)
                     }
                     //on network failure, try permamnent cache
-                    Err(e) => match self.local_datasource.get(None) {
+                    Err(e) => match self.local_datasource.get(0_u8) {
                         Some(spells) => Ok(spells),
                         None => Err(SpellRepositoryError::DataSourceError(e)),
                     },
@@ -205,12 +205,12 @@ mod tests {
         let _ = repository.get_all_spells_and_cache();
 
         assert_eq!(
-            repository.local_datasource.get(Some(0_u8)),
+            repository.local_datasource.get(0_u8),
             Some(dummy_spell_model())
         );
 
         assert_eq!(
-            repository.local_datasource.get_recent(Some(0_u8)),
+            repository.local_datasource.get_recent(0_u8),
             Some(&dummy_spell_model())
         );
     }
