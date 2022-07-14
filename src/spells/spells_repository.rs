@@ -89,7 +89,7 @@ where
             })
             .filter(|spell| {
                 if let Some(classes) = &filters.classes {
-                    self.filter_spell_for_class(spell, classes)
+                    self.filter_spell_for_classes(spell, classes)
                 } else {
                     true
                 }
@@ -103,7 +103,7 @@ where
         }
     }
 
-    fn filter_spell_for_class(&self, spell: &SpellModel, classes: &[String]) -> bool {
+    fn filter_spell_for_classes(&self, spell: &SpellModel, classes: &[String]) -> bool {
         spell.classes.iter().flatten().any(|spell_class| {
             classes.iter().any(|filter_class| -> bool {
                 spell_class.name == Some(filter_class.to_string())
@@ -260,7 +260,7 @@ mod tests {
         assert_eq!(filtered[0], dummy_multi_spell_model()[2]);
     }
     #[test]
-    fn test_bad_min_evel_filter_spells() {
+    fn test_bad_min_level_filter_spells() {
         let mut filters = dummy_repo_filters();
         filters.min_level = Some(4.0);
         let mut repository = make_multi_spell_repository();
