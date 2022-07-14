@@ -5,5 +5,9 @@ query SpellsQuery($limit: Int) {
     desc
     url
     index
+    classes {
+      index
+      name
+    }
   }
 }

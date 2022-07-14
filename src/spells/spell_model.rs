@@ -9,6 +9,7 @@ pub struct SpellModel {
     pub desc: Option<Vec<Option<String>>>,
     pub url: Option<String>,
     pub index: Option<String>,
+    pub classes: Option<Vec<AbilityScoreSkillsModel>>,
 }
 
 impl SpellModel {
@@ -18,6 +19,7 @@ impl SpellModel {
         desc: Option<Vec<Option<String>>>,
         url: Option<String>,
         index: Option<String>,
+        classes: Option<Vec<AbilityScoreSkillsModel>>,
     ) -> Self {
         Self {
             name,
@@ -25,6 +27,7 @@ impl SpellModel {
             desc,
             url,
             index,
+            classes,
         }
     }
 }
@@ -47,5 +50,17 @@ impl Display for SpellModel {
                 None => "None",
             },
         )
+    }
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct AbilityScoreSkillsModel {
+    name: Option<String>,
+    index: Option<String>,
+}
+
+impl AbilityScoreSkillsModel {
+    pub fn new(name: Option<String>, index: Option<String>) -> Self {
+        Self { name, index }
     }
 }

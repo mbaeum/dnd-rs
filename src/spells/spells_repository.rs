@@ -126,7 +126,11 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::spells::spell_model::SpellModel;
+    use crate::spells::spell_model::{AbilityScoreSkillsModel, SpellModel};
+
+    fn dummy_ability_score(name: &str) -> AbilityScoreSkillsModel {
+        AbilityScoreSkillsModel::new(Some(name.to_string()), Some(name.to_string()))
+    }
 
     fn dummy_spell_model() -> Vec<SpellModel> {
         vec![SpellModel::new(
@@ -135,6 +139,7 @@ mod tests {
             Some(vec![Some("default".to_string())]),
             Some("default".to_string()),
             Some("default-index".to_string()),
+            None,
         )]
     }
 
@@ -146,6 +151,7 @@ mod tests {
                 Some(vec![Some("default".to_string())]),
                 Some("default".to_string()),
                 Some("default-index".to_string()),
+                Some(vec![dummy_ability_score("test_class1")]),
             ),
             SpellModel::new(
                 Some("default".to_string()),
@@ -153,6 +159,7 @@ mod tests {
                 Some(vec![Some("default".to_string())]),
                 Some("default".to_string()),
                 Some("default-index".to_string()),
+                Some(vec![dummy_ability_score("test_class2")]),
             ),
             SpellModel::new(
                 Some("default".to_string()),
@@ -160,6 +167,7 @@ mod tests {
                 Some(vec![Some("default".to_string())]),
                 Some("default".to_string()),
                 Some("default-index".to_string()),
+                Some(vec![dummy_ability_score("test_class3")]),
             ),
         ]
     }
