@@ -8,7 +8,7 @@ type Spell {
     desc: [String]
     url: String
     index: String
-    duration: String
+    classes: [AbilityScoreSkills]
 }
 
 type SpellsQuery {
@@ -20,3 +20,7 @@ input FilterFindManySpellInput {
   index: String
 }
 
+type AbilityScoreSkills {
+  name: String
+  index: String
+}
