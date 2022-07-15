@@ -8,20 +8,20 @@ pub struct Spell {
 
 impl Display for Spell {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
-        write!(f, "-----{}----", "-".repeat(self.name.len()));
-        write!(f, "-----{}----", self.name);
-        write!(f, "Level:");
-        write!(f, "\t{}", self.level);
-        if self.classes.not_empty() {
-            write!(f, "Classes:");
-            write!(f, "\t{}", self.classes.join(", "));
+        writeln!(f, "-----{}----", "-".repeat(self.name.len()))?;
+        writeln!(f, "-----{}----", self.name)?;
+        writeln!(f, "Level:")?;
+        writeln!(f, "\t{}", self.level)?;
+        if !self.classes.is_empty() {
+            writeln!(f, "Classes:")?;
+            writeln!(f, "\t{}", self.classes.join(", "))?;
         }
-        if self.desc.not_empty() {
-            write!(f, "Description:");
-            for desc in self.desc {
-                write!(f, "\t{}", desc);
-            }
+        if !self.desc.is_empty() {
+            writeln!(f, "Description:")?;
+            writeln!(f, "\t{}", self.desc.join("\n\t"))?;
         }
+        writeln!(f, "-----{}----", "-".repeat(self.name.len()))?;
+        writeln!(f, "-----{}----", "-".repeat(self.name.len()))?;
 
         Ok(())
     }
