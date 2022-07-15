@@ -2,7 +2,7 @@ pub mod core;
 pub mod datasources;
 pub mod entry_points;
 
-use crate::core::usecase::random_spell::{RandomSpell, UsecaseInterface};
+use crate::core::usecase::random_spell::{RandomSpell, RandomSpellInterface};
 use crate::datasources::common::remote_datasource::GraphQLAPI;
 use crate::datasources::spells::spells_datasource::SpellsGraphQLDataSource;
 use crate::entry_points::cli::{Arguments, SubCommand};
