@@ -22,16 +22,7 @@ fn map_use_case(args: Arguments) {
             let spell = usecase
                 .get_random_spell(args.level, args.classes, args.exact_level)
                 .unwrap();
-            println!("-----{}----", "-".repeat(spell.name.len()));
-            println!("-----{}----", spell.name);
-            println!("Level:");
-            println!("\t{}", spell.level);
-            println!("Classes:");
-            println!("\t{}", spell.classes.join(", "));
-            println!("Description:");
-            for desc in spell.desc {
-                println!("\t{}", desc);
-            }
+            println!("{}", spell);
         }
     }
 }
