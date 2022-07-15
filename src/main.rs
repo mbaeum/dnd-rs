@@ -2,6 +2,7 @@ pub mod core;
 pub mod datasources;
 pub mod entry_points;
 
+use crate::core::usecase::dice_roll::DiceRoll;
 use crate::core::usecase::random_spell::RandomSpell;
 use crate::datasources::common::remote_datasource::GraphQLAPI;
 use crate::datasources::spells::spells_datasource::SpellsGraphQLDataSource;
@@ -15,8 +16,12 @@ fn setup_random_spell_usecase() -> RandomSpell<SpellsGraphQLDataSource> {
     RandomSpell::<SpellsGraphQLDataSource>::new(datasource, cache_time)
 }
 
+fn setup_dice_roll_usecase() -> DiceRoll {
+    DiceRoll::new()
+}
+
 #[tokio::main]
 async fn main() {
-    let mut cli = MainCli::new(setup_random_spell_usecase());
+    let mut cli = MainCli::new(setup_random_spell_usecase(), setup_dice_roll_usecase());
     cli.run().unwrap();
 }

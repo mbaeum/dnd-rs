@@ -1,3 +1,4 @@
+use crate::core::usecase::dice_roll::{DiceRollError, DiceRollInterface};
 use crate::core::usecase::random_spell::{RandomSpellError, RandomSpellInterface};
 use clap::{Args, Parser, Subcommand};
 
@@ -6,6 +7,7 @@ pub enum CliError {
     UnknownSubCommand(String),
     Clap(clap::Error),
     RandomSpell(RandomSpellError),
+    DiceRoll(DiceRollError),
 }
 
 /// CLI for D&D 5e shenanigans
@@ -20,6 +22,8 @@ pub struct Arguments {
 pub enum SubCommand {
     /// Enter Spells API
     RandomSpell(RandomSpellArgs),
+    /// Enter Dice API
+    DiceRoll(DiceRollArgs),
 }
 
 #[derive(Args, Clone, Debug)]
@@ -42,27 +46,44 @@ pub struct RandomSpellArgs {
     pub exact_level: bool,
 }
 
-pub struct MainCli<R>
+#[derive(Args, Clone, Debug)]
+/// Roll some dice
+pub struct DiceRollArgs {
+    #[clap(
+        short,
+        long,
+        value_delimiter = ',',
+        help = "Comma-separated list of dice (e.g. 1d20+2)"
+    )]
+    pub dice_sets: Vec<String>,
+}
+
+pub struct MainCli<R, D>
 where
     R: RandomSpellInterface,
+    D: DiceRollInterface,
 {
     random_spell_usecase: R,
+    dice_roll_usecase: D,
     args: Arguments,
 }
 
-impl<R> MainCli<R>
+impl<R, D> MainCli<R, D>
 where
     R: RandomSpellInterface,
+    D: DiceRollInterface,
 {
-    pub fn new(random_spell_usecase: R) -> Self {
+    pub fn new(random_spell_usecase: R, dice_roll_usecase: D) -> Self {
         MainCli {
             random_spell_usecase,
+            dice_roll_usecase,
             args: Arguments::parse(),
         }
     }
     pub fn run(&mut self) -> Result<(), CliError> {
         match self.args.cmd.clone() {
             SubCommand::RandomSpell(args) => self.handle_random_spell_cmd(&args),
+            SubCommand::DiceRoll(args) => self.handle_dice_roll_cmd(&args),
         }
     }
 
@@ -72,6 +93,14 @@ where
             .get_random_spell(args.level, args.classes.to_vec(), args.exact_level)
             .unwrap();
         println!("{}", spell);
+        Ok(())
+    }
+    pub fn handle_dice_roll_cmd(&mut self, args: &DiceRollArgs) -> Result<(), CliError> {
+        let dice_set = self
+            .dice_roll_usecase
+            .roll(args.dice_sets.to_vec())
+            .unwrap();
+        println!("{}", dice_set);
         Ok(())
     }
 }
