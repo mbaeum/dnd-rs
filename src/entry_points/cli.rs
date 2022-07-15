@@ -5,7 +5,7 @@ use clap::{Args, Parser, Subcommand};
 #[clap(version)]
 pub struct Arguments {
     #[clap(subcommand)]
-    cmd: SubCommand,
+    pub cmd: SubCommand,
 }
 
 #[derive(Subcommand, Debug)]
@@ -32,11 +32,4 @@ pub struct Random {
     pub classes: Vec<String>,
     #[clap(short, long, takes_value(false), help = "Get spells for exact <LEVEL>")]
     pub exact_level: bool,
-    // #[clap(
-    //     short = 'm',
-    //     long,
-    //     takes_value(false),
-    //     help = "Get spells for <LEVEL> or higher"
-    // )]
-    // pub min_level: bool,
 }

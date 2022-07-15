@@ -1,6 +1,8 @@
-use crate::spells::spell_queries::spells_query::SpellsQuerySpells;
-use crate::spells::spell_queries::spells_query::SpellsQuerySpellsClasses;
+use self::spells_query::SpellsQuerySpells;
+use self::spells_query::SpellsQuerySpellsClasses;
+
 use graphql_client::GraphQLQuery;
+
 #[derive(GraphQLQuery, PartialEq)]
 #[graphql(
     query_path = "queries/spells/spells_query.graphql",

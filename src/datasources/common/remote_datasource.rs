@@ -1,12 +1,13 @@
 use graphql_client::{Error as GraphQLError, GraphQLQuery, Response};
 use reqwest;
-use reqwest::Error as ReqwestError;
+use reqwest::{Error as ReqwestError, StatusCode};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug)]
 pub enum APIError {
-    GraphQLAPIError(GraphQLError),
-    ReqwestError(ReqwestError),
+    GraphQL(GraphQLError),
+    Reqwest(ReqwestError),
+    ResponseHttp(StatusCode, String),
 }
 
 #[derive(Debug)]
@@ -30,16 +31,22 @@ impl GraphQLAPI {
         let request_body = <Query>::build_query(variables);
         let response = match client.post(&self.api_url).json(&request_body).send().await {
             Ok(res) => res,
-            Err(err) => return Err(APIError::ReqwestError(err)),
+            Err(err) => return Err(APIError::Reqwest(err)),
         };
+        let status = response.status();
+        let canonical_reason = status.canonical_reason().unwrap_or("Unknown").to_string();
+        if status != StatusCode::OK {
+            return Err(APIError::ResponseHttp(status, canonical_reason));
+        }
         let response_body: Response<Query::ResponseData> = match response.json().await {
             Ok(response_body) => response_body,
-            Err(err) => return Err(APIError::ReqwestError(err)),
+            Err(err) => return Err(APIError::Reqwest(err)),
+            // Err(err) => return Err(APIError::CustomError(format!("Error in response: {}", err))),
         };
         let data: Query::ResponseData = match response_body.data {
             Some(data) => data,
             None => {
-                return Err(APIError::GraphQLAPIError(
+                return Err(APIError::GraphQL(
                     // in case of multiple errors reported, pick first
                     match response_body.errors {
                         Some(errors) => match errors.first() {

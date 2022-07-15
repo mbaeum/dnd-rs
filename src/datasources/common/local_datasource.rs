@@ -6,6 +6,7 @@ use std::time::{Duration, Instant};
 pub struct LocalDatasource<T> {
     cache: LruCache<u8, Vec<T>>,
     expiry_cache: LruCache<u8, Option<Instant>>,
+    duration: u64,
 }
 
 impl<T> LocalDatasource<T>
@@ -19,16 +20,19 @@ where
         Self {
             cache: LruCache::<u8, Vec<T>>::with_capacity(capacity),
             expiry_cache,
+            duration,
         }
     }
 
     pub fn insert(&mut self, value: Vec<T>, key: u8) {
         self.cache.insert(key, value);
+        let expiry_date = Instant::now().checked_add(Duration::from_millis(self.duration));
+        self.expiry_cache.insert(0, expiry_date);
     }
 
-    pub fn get(&mut self, key: u8) -> Option<&Vec<T>> {
-        self.cache.get(&key)
-    }
+    // pub fn get(&mut self, key: u8) -> Option<&Vec<T>> {
+    //     self.cache.get(&key)
+    // }
 
     pub fn get_recent(&mut self, key: u8) -> Option<&Vec<T>> {
         let now = Instant::now();
@@ -53,15 +57,15 @@ mod tests {
     fn test_insert() {
         let mut cache = LocalDatasource::<String>::new(1, 1000);
         cache.insert(vec!["test".to_string()], 0_u8);
-        assert_eq!(cache.get(0_u8), Some(&vec!["test".to_string()]));
+        assert_eq!(cache.cache.get(&0_u8), Some(&vec!["test".to_string()]));
     }
 
     #[test]
     fn test_get() {
         let mut cache = LocalDatasource::<String>::new(1, 1000);
         cache.insert(vec!["test".to_string()], 0_u8);
-        assert_eq!(cache.get(0_u8), Some(&vec!["test".to_string()]));
-        assert_eq!(cache.get(0_u8), Some(&vec!["test".to_string()]));
+        assert_eq!(cache.cache.get(&0_u8), Some(&vec!["test".to_string()]));
+        assert_eq!(cache.cache.get(&0_u8), Some(&vec!["test".to_string()]));
     }
 
     #[test]

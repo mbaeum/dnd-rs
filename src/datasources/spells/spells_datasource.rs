@@ -1,19 +1,12 @@
-use super::spell_queries::spells_query::SpellsQuerySpells;
-use super::spell_queries::{spells_query, SpellsQuery};
-use crate::datasources::remote_datasource::*;
+use crate::core::usecase::random_spell::{SpellsDataSourceError, SpellsDataSourceInterface};
+use crate::datasources::common::remote_datasource::GraphQLAPI;
+use crate::datasources::queries::spells_query::spells_query::{
+    ResponseData, SpellsQuerySpells, Variables,
+};
+use crate::datasources::queries::spells_query::SpellsQuery;
+// use crate::datasources::queries::spells_query;
 use futures::executor::block_on;
 
-#[derive(Debug)]
-pub enum SpellsDataSourceError {
-    GraphQLError(APIError),
-    NoSpellsFound,
-}
-
-pub trait SpellsDataSource {
-    fn get_all_spells(&self) -> Result<Vec<SpellsQuerySpells>, SpellsDataSourceError>;
-}
-
-#[derive(Debug)]
 pub struct SpellsGraphQLDataSource {
     api: GraphQLAPI,
 }
@@ -23,19 +16,15 @@ impl SpellsGraphQLDataSource {
         Self { api }
     }
 
-    fn make_variables(&self) -> spells_query::Variables {
-        spells_query::Variables { limit: Some(0) }
+    fn make_variables(&self) -> Variables {
+        Variables { limit: Some(0) }
     }
 
-    async fn get_all_raw_spells(
-        &self,
-    ) -> Result<spells_query::ResponseData, SpellsDataSourceError> {
+    async fn get_all_raw_spells(&self) -> Result<ResponseData, SpellsDataSourceError> {
         let variables = self.make_variables();
         let response_data = self
             .api
-            .get_response_data::<spells_query::Variables, spells_query::ResponseData, SpellsQuery>(
-                variables,
-            )
+            .get_response_data::<Variables, ResponseData, SpellsQuery>(variables)
             .await;
         match response_data {
             Ok(data) => Ok(data),
@@ -44,7 +33,7 @@ impl SpellsGraphQLDataSource {
     }
 }
 
-impl SpellsDataSource for SpellsGraphQLDataSource {
+impl SpellsDataSourceInterface for SpellsGraphQLDataSource {
     fn get_all_spells(&self) -> Result<Vec<SpellsQuerySpells>, SpellsDataSourceError> {
         let data = block_on(self.get_all_raw_spells());
         let spells = data?.spells;

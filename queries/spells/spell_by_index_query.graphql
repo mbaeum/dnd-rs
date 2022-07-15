@@ -1,9 +1,0 @@
-query SpellByIndexQuery($filter: FilterFindManySpellInput) {
-  spells(filter: $filter) {
-    name
-    level
-    desc
-    url
-    index
-  }
-}
