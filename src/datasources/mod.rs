@@ -1,2 +1,3 @@
-pub mod local_datasource;
-pub mod remote_datasource;
+pub(crate) mod common;
+pub mod queries;
+pub mod spells;
