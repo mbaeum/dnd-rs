@@ -1,1 +1,1 @@
-pub mod dnd_cli;
+pub mod cli;
