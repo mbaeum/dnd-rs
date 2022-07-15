@@ -14,6 +14,7 @@ OPTIONS:
     -V, --version    Print version information
 
 SUBCOMMANDS:
+    dice-roll       Enter Dice API
     help            Print this message or the help of the given subcommand(s)
     random-spell    Enter Spells API
 ```
@@ -28,6 +29,15 @@ OPTIONS:
     -h, --help                 Print help information
     -l, --level <LEVEL>        Level of spell (by default this is maximum level, get exact with -e,
                                minimum with -m)
+```
+
+```bash
+USAGE:
+    random-spells-cli dice-roll [OPTIONS]
+
+OPTIONS:
+    -d, --dice-sets <DICE_SETS>    Comma-separated list of dice (e.g. 1d20+2)
+    -h, --help                     Print help information
 ```
 
 ## Usage Examples (local only at the moment)
@@ -49,4 +59,8 @@ cargo run -- random-spell -l 2
 
 ```bash
 cargo run -- random-spell -l 2 -e
+```
+5. Roll a list of dice
+```bash
+cargo run -- dice-roll -d 2d20,1d6+3
 ```
