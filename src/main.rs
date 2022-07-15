@@ -2,7 +2,7 @@ pub mod core;
 pub mod datasources;
 pub mod entry_points;
 
-use crate::core::usecase::random_spell::{RandomSpell, RandomSpellInterface};
+use crate::core::usecase::random_spell::{RandomSpell, UsecaseInterface};
 use crate::datasources::common::remote_datasource::GraphQLAPI;
 use crate::datasources::spells::spells_datasource::SpellsGraphQLDataSource;
 use crate::entry_points::cli::{Arguments, SubCommand};
@@ -22,16 +22,7 @@ fn map_use_case(args: Arguments) {
             let spell = usecase
                 .get_random_spell(args.level, args.classes, args.exact_level)
                 .unwrap();
-            println!("-----{}----", "-".repeat(spell.name.len()));
-            println!("-----{}----", spell.name);
-            println!("Level:");
-            println!("\t{}", spell.level);
-            println!("Classes:");
-            println!("\t{}", spell.classes.join(", "));
-            println!("Description:");
-            for desc in spell.desc {
-                println!("\t{}", desc);
-            }
+            println!("{}", spell);
         }
     }
 }
