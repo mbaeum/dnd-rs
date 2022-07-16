@@ -1,12 +1,8 @@
-pub mod core;
-pub mod datasources;
-pub mod entry_points;
-
-use crate::core::usecase::dice_roll::DiceRoll;
-use crate::core::usecase::random_spell::RandomSpell;
-use crate::datasources::common::remote_datasource::GraphQLAPI;
-use crate::datasources::spells::spells_datasource::SpellsGraphQLDataSource;
-use crate::entry_points::cli::MainCli;
+use random_spells_cli::core::{usecase::dice_roll::DiceRoll, usecase::random_spell::RandomSpell};
+use random_spells_cli::datasources::{
+    common::remote_datasource::GraphQLAPI, spells::spells_datasource::SpellsGraphQLDataSource,
+};
+use random_spells_cli::entry_points::cli::MainCli;
 
 fn setup_random_spell_usecase() -> RandomSpell<SpellsGraphQLDataSource> {
     let api_url = "https://www.dnd5eapi.co/graphql".to_string();
