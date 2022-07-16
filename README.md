@@ -71,3 +71,8 @@ cargo run -- dice-roll 2d20 1d6+3
 ```bash 
 cp scripts/pre-commit .git/hooks/ && chmod +x ./.git/hooks/pre-commit && git init
 ```
+
+### Running benchmarks
+```bash
+cargo +nightly bench --features unstable
+```
