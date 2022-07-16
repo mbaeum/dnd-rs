@@ -62,5 +62,5 @@ cargo run -- random-spell -l 2 -e
 ```
 5. Roll a list of dice
 ```bash
-cargo run -- dice-roll -d 2d20,1d6+3
+cargo run -- dice-roll 2d20 1d6+3
 ```
