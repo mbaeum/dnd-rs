@@ -75,3 +75,21 @@ impl Display for DiceSet {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_dice_roll() {
+        let dice = Dice::new(1, 20, Some(2));
+        let result = dice.roll();
+        assert!(result > 2 && result <= 22);
+    }
+    #[test]
+    fn test_dice_set_roll() {
+        let dice = Dice::new(1, 20, Some(2));
+        let mut dice_set = DiceSet::new(&[dice]);
+        dice_set.roll();
+        assert!(dice_set.result > 2 && dice_set.result <= 22);
+    }
+}
