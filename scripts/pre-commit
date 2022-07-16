@@ -1,0 +1,43 @@
+#!/bin/sh
+
+set -eu
+
+RED="\033[1;31m"
+GREEN="\033[1;32m"
+NC="\033[0m"
+
+if ! cargo test -q
+then
+    echo "There are some test issues....${RED}x${NC}"
+    exit 1
+else
+    echo "Tests are good....${GREEN}✔${NC}"
+fi
+
+if ! cargo fmt -q -- --check
+then
+    echo "There are some code style issues...${RED}x${NC}"
+    echo "Run cargo fmt first."
+    exit 1
+else
+    echo "Code style is good...${GREEN}✔${NC}"
+fi
+
+if ! cargo clippy -q --all-targets -- -D warnings
+then
+    echo "There are some clippy issues...${RED}x${NC}"
+    exit 1
+else
+    echo "Clippy is good...${GREEN}✔${NC}"
+fi
+
+if ! cargo build -q
+then 
+    echo "There are some build issues....${RED}x${NC}"
+    exit 1
+else
+    echo "Build is good....${GREEN}✔${NC}"
+fi
+
+echo "Everything is good...${GREEN}✔${NC}"
+exit 0

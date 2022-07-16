@@ -50,10 +50,8 @@ pub struct RandomSpellArgs {
 /// Roll some dice
 pub struct DiceRollArgs {
     #[clap(
-        short,
-        long,
-        value_delimiter = ',',
-        help = "Comma-separated list of dice (e.g. 1d20+2)"
+        value_delimiter = ' ',
+        help = "Space-separated list of dice (e.g. 1d20+2 1d3)"
     )]
     pub dice_sets: Vec<String>,
 }

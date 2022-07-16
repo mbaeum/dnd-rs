@@ -40,7 +40,7 @@ OPTIONS:
     -h, --help                     Print help information
 ```
 
-## Usage Examples (local only at the moment)
+### Usage Examples (local only at the moment)
 1. Get any random spell
 ```bash
 cargo run -- random-spell
@@ -62,5 +62,12 @@ cargo run -- random-spell -l 2 -e
 ```
 5. Roll a list of dice
 ```bash
-cargo run -- dice-roll -d 2d20,1d6+3
+cargo run -- dice-roll 2d20 1d6+3
+```
+
+## Contributing
+
+### Setting up pre-commit hook
+```bash 
+cp scripts/pre-commit .git/hooks/ && chmod +x ./.git/hooks/pre-commit && git init
 ```

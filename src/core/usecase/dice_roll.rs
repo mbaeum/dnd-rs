@@ -3,7 +3,7 @@ use crate::core::entity::dice_set::{Dice, DiceSet};
 use std::num::ParseIntError;
 use std::string::String;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum DiceRollError {
     ParseDiceCountError(ParseIntError),
     ParseFaceError(ParseIntError),
@@ -88,5 +88,92 @@ impl DiceRollInterface for DiceRoll {
 impl Default for DiceRoll {
     fn default() -> Self {
         DiceRoll::new()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_dice_count_and_face() {
+        let dice_roll = DiceRoll::new();
+        assert_eq!(dice_roll.parse_dice_count_and_face("1d6").unwrap(), (1, 6));
+        assert_eq!(dice_roll.parse_dice_count_and_face("2D6").unwrap(), (2, 6));
+    }
+
+    #[test]
+    fn test_parse_dice_count_and_face_fail() {
+        let dice_roll = DiceRoll::new();
+        let empty_err = "".parse::<u64>().unwrap_err();
+        let invalid_err = "invalid".parse::<u64>().unwrap_err();
+        assert_eq!(
+            dice_roll.parse_dice_count_and_face("1d"),
+            Err(DiceRollError::ParseFaceError(empty_err.clone()))
+        );
+        assert_eq!(
+            dice_roll.parse_dice_count_and_face("1dU"),
+            Err(DiceRollError::ParseFaceError(invalid_err.clone()))
+        );
+        assert_eq!(
+            dice_roll.parse_dice_count_and_face("d1"),
+            Err(DiceRollError::ParseDiceCountError(empty_err))
+        );
+        assert_eq!(
+            dice_roll.parse_dice_count_and_face("Ud1"),
+            Err(DiceRollError::ParseDiceCountError(invalid_err))
+        );
+        assert_eq!(
+            dice_roll.parse_dice_count_and_face("").unwrap_err(),
+            DiceRollError::InvalidDiceString("".to_string())
+        );
+        assert_eq!(
+            dice_roll.parse_dice_count_and_face("mememe").unwrap_err(),
+            DiceRollError::InvalidDiceString("mememe".to_string())
+        );
+    }
+
+    #[test]
+    fn test_parse_dice_string() {
+        let dice_roll = DiceRoll::new();
+        assert_eq!(
+            dice_roll.parse_dice_string("1d6+1").unwrap(),
+            Dice {
+                dice_count: 1,
+                face: 6,
+                modifier: Some(1),
+            }
+        );
+        assert_eq!(
+            dice_roll.parse_dice_string("1d6").unwrap(),
+            Dice {
+                dice_count: 1,
+                face: 6,
+                modifier: None,
+            }
+        );
+    }
+
+    #[test]
+    fn test_parse_dice_string_fail() {
+        let dice_roll = DiceRoll::new();
+        let empty_err = "".parse::<u64>().unwrap_err();
+        let invalid_err = "invalid".parse::<u64>().unwrap_err();
+        assert_eq!(
+            dice_roll.parse_dice_string("1d2+U").unwrap_err(),
+            DiceRollError::ParseModifierError(invalid_err)
+        );
+        assert_eq!(
+            dice_roll.parse_dice_string("1d2+").unwrap_err(),
+            DiceRollError::ParseModifierError(empty_err)
+        );
+        assert_eq!(
+            dice_roll.parse_dice_string("").unwrap_err(),
+            DiceRollError::InvalidDiceString("".to_string())
+        );
+        assert_eq!(
+            dice_roll.parse_dice_string("mememe").unwrap_err(),
+            DiceRollError::InvalidDiceString("mememe".to_string())
+        );
     }
 }
