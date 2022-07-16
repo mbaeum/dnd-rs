@@ -117,11 +117,11 @@ mod tests {
         );
         assert_eq!(
             dice_roll.parse_dice_count_and_face("d1"),
-            Err(DiceRollError::ParseDiceCountError(empty_err.clone()))
+            Err(DiceRollError::ParseDiceCountError(empty_err))
         );
         assert_eq!(
             dice_roll.parse_dice_count_and_face("Ud1"),
-            Err(DiceRollError::ParseDiceCountError(invalid_err.clone()))
+            Err(DiceRollError::ParseDiceCountError(invalid_err))
         );
         assert_eq!(
             dice_roll.parse_dice_count_and_face("").unwrap_err(),
@@ -161,11 +161,11 @@ mod tests {
         let invalid_err = "invalid".parse::<u64>().unwrap_err();
         assert_eq!(
             dice_roll.parse_dice_string("1d2+U").unwrap_err(),
-            DiceRollError::ParseModifierError(invalid_err.clone())
+            DiceRollError::ParseModifierError(invalid_err)
         );
         assert_eq!(
             dice_roll.parse_dice_string("1d2+").unwrap_err(),
-            DiceRollError::ParseModifierError(empty_err.clone())
+            DiceRollError::ParseModifierError(empty_err)
         );
         assert_eq!(
             dice_roll.parse_dice_string("").unwrap_err(),
