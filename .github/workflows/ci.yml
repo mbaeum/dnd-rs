@@ -22,7 +22,7 @@ jobs:
         include:
         - build: pinned
           os: ubuntu-18.04
-          rust: 1.52.1
+          rust: 1.62.1
         - build: stable
           os: ubuntu-18.04
           rust: stable
@@ -76,7 +76,7 @@ jobs:
         with: 
           toolchain: stable
           components: clippy
-      - run: cargo clippy --all-targets -- -D warnings --all-features
+      - run: cargo clippy --all-targets -- -D warnings
   
   build:
     name: build
