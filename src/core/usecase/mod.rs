@@ -1,2 +1,2 @@
-pub mod dice_roll;
-pub mod random_spell;
+pub mod dice;
+pub mod spell;

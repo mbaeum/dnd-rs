@@ -21,22 +21,31 @@ pub enum LocalSpellsDataSourceError {
 }
 
 #[derive(Debug)]
-pub enum RandomSpellError {
+pub enum SpellError {
     NoSpellsFound,
     DataSourceError(SpellsDataSourceError),
     LocalDataSourceError(LocalSpellsDataSourceError),
 }
 
-pub trait RandomSpellInterface {
+pub trait SpellInterface {
     fn get_random_spell(
         &mut self,
         level: Option<f64>,
         classes: Vec<String>,
         exact_level: bool,
-    ) -> Result<Spell, RandomSpellError>;
+    ) -> Result<Spell, SpellError>;
+
+    fn get_spell_by_name(&mut self, name: String) -> Result<Spell, SpellError>;
+
+    fn get_all_spells_with_filters(
+        &mut self,
+        level: Option<f64>,
+        classes: Vec<String>,
+        exact_level: bool,
+    ) -> Result<Vec<Spell>, SpellError>;
 }
 
-pub struct RandomSpell<T>
+pub struct SpellImplementation<T>
 where
     T: SpellsDataSourceInterface,
 {
@@ -44,23 +53,23 @@ where
     local_datasource: LocalDatasource<SpellsQuerySpells>,
 }
 
-impl<T> RandomSpell<T>
+impl<T> SpellImplementation<T>
 where
     T: SpellsDataSourceInterface,
 {
     pub fn new(datasource: T, cache_time: Option<u64>) -> Self {
         let cache_time = cache_time.unwrap_or(1000);
         let local_datasource = LocalDatasource::<SpellsQuerySpells>::new(2, cache_time);
-        RandomSpell {
+        SpellImplementation {
             datasource,
             local_datasource,
         }
     }
 
-    fn get_spells_from_datasource(&self) -> Result<Vec<SpellsQuerySpells>, RandomSpellError> {
+    fn get_spells_from_datasource(&self) -> Result<Vec<SpellsQuerySpells>, SpellError> {
         match self.datasource.get_all_spells() {
             Ok(spells) => Ok(spells),
-            Err(err) => Err(RandomSpellError::DataSourceError(err)),
+            Err(err) => Err(SpellError::DataSourceError(err)),
         }
     }
 
@@ -77,10 +86,10 @@ where
 
     fn get_spells_from_recent_local_datasource(
         &mut self,
-    ) -> Result<Vec<SpellsQuerySpells>, RandomSpellError> {
+    ) -> Result<Vec<SpellsQuerySpells>, SpellError> {
         match self.local_datasource.get_recent(0) {
             Some(spells) => Ok(spells.to_vec()),
-            None => Err(RandomSpellError::LocalDataSourceError(
+            None => Err(SpellError::LocalDataSourceError(
                 LocalSpellsDataSourceError::RecentCacheEmpty,
             )),
         }
@@ -90,20 +99,20 @@ where
         self.local_datasource.insert(spells, 0);
     }
 
-    fn get_all_spells(&mut self) -> Result<Vec<SpellsQuerySpells>, RandomSpellError> {
+    fn get_all_spells(&mut self) -> Result<Vec<SpellsQuerySpells>, SpellError> {
         match self.get_spells_from_recent_local_datasource() {
             Ok(spells) => Ok(spells),
             Err(err) => match err {
-                RandomSpellError::LocalDataSourceError(
-                    LocalSpellsDataSourceError::RecentCacheEmpty,
-                ) => match self.get_spells_from_datasource() {
-                    Ok(spells) => {
-                        let cache_spells = spells.to_vec();
-                        self.cache_spells(cache_spells);
-                        Ok(spells)
+                SpellError::LocalDataSourceError(LocalSpellsDataSourceError::RecentCacheEmpty) => {
+                    match self.get_spells_from_datasource() {
+                        Ok(spells) => {
+                            let cache_spells = spells.to_vec();
+                            self.cache_spells(cache_spells);
+                            Ok(spells)
+                        }
+                        Err(err) => Err(err),
                     }
-                    Err(err) => Err(err),
-                },
+                }
                 _ => Err(err),
             },
         }
@@ -132,13 +141,13 @@ where
         level: Option<f64>,
         classes: Vec<String>,
         exact_level: bool,
-    ) -> Result<Vec<SpellsQuerySpells>, RandomSpellError> {
+    ) -> Result<Vec<SpellsQuerySpells>, SpellError> {
         let mut filtered_spells = match spells
             .into_iter()
             .filter(|spell| self.filter_spell_for_classes(spell, &classes))
             .collect::<Vec<SpellsQuerySpells>>()
         {
-            f if f.is_empty() => return Err(RandomSpellError::NoSpellsFound),
+            f if f.is_empty() => return Err(SpellError::NoSpellsFound),
             f => f,
         };
         match level {
@@ -163,10 +172,10 @@ where
     fn get_random_spell(
         &mut self,
         spells: Vec<SpellsQuerySpells>,
-    ) -> Result<SpellsQuerySpells, RandomSpellError> {
+    ) -> Result<SpellsQuerySpells, SpellError> {
         match spells.choose(&mut rand::thread_rng()) {
             Some(spell) => Ok(spell.clone()),
-            None => Err(RandomSpellError::NoSpellsFound),
+            None => Err(SpellError::NoSpellsFound),
         }
     }
 
@@ -207,7 +216,7 @@ where
     }
 }
 
-impl<T> RandomSpellInterface for RandomSpell<T>
+impl<T> SpellInterface for SpellImplementation<T>
 where
     T: SpellsDataSourceInterface,
 {
@@ -216,12 +225,57 @@ where
         level: Option<f64>,
         classes: Vec<String>,
         exact_level: bool,
-    ) -> Result<Spell, RandomSpellError> {
+    ) -> Result<Spell, SpellError> {
         let spells = self.get_all_spells()?;
         let filtered_spells = self.filter_spells(spells, level, classes, exact_level)?;
         match self.get_random_spell(filtered_spells) {
             Ok(spell) => Ok(self.spell_from_spells_query_spells(&spell)),
             Err(err) => Err(err),
+        }
+    }
+
+    fn get_spell_by_name(&mut self, name: String) -> Result<Spell, SpellError> {
+        let name = name.to_lowercase().trim().to_string();
+        let spells = self.get_all_spells()?;
+        let filtered_spells = spells
+            .into_iter()
+            .filter(|spell| {
+                *spell
+                    .name
+                    .as_ref()
+                    .unwrap_or(&"".to_string())
+                    .to_lowercase()
+                    .trim()
+                    == name
+                    || *spell
+                        .index
+                        .as_ref()
+                        .unwrap_or(&"".to_string())
+                        .to_lowercase()
+                        .trim()
+                        == name.clone()
+            })
+            .collect::<Vec<SpellsQuerySpells>>();
+        match filtered_spells {
+            f if f.is_empty() => Err(SpellError::NoSpellsFound),
+            _ => Ok(self.spell_from_spells_query_spells(&filtered_spells[0])),
+        }
+    }
+
+    fn get_all_spells_with_filters(
+        &mut self,
+        level: Option<f64>,
+        classes: Vec<String>,
+        exact_level: bool,
+    ) -> Result<Vec<Spell>, SpellError> {
+        let spells = self.get_all_spells()?;
+        let filtered_spells = self.filter_spells(spells, level, classes, exact_level)?;
+        match filtered_spells {
+            f if f.is_empty() => Err(SpellError::NoSpellsFound),
+            _ => Ok(filtered_spells
+                .into_iter()
+                .map(|spell| self.spell_from_spells_query_spells(&spell))
+                .collect::<Vec<Spell>>()),
         }
     }
 }

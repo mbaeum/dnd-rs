@@ -1,13 +1,13 @@
-use crate::core::usecase::dice_roll::{DiceRollError, DiceRollInterface};
-use crate::core::usecase::random_spell::{RandomSpellError, RandomSpellInterface};
+use crate::core::usecase::dice::{DiceError, DiceInterface};
+use crate::core::usecase::spell::{SpellError, SpellInterface};
 use clap::{Args, Parser, Subcommand};
 
 #[derive(Debug)]
 pub enum CliError {
     UnknownSubCommand(String),
     Clap(clap::Error),
-    RandomSpell(RandomSpellError),
-    DiceRoll(DiceRollError),
+    Spell(SpellError),
+    Dice(DiceError),
 }
 
 /// CLI for D&D 5e shenanigans
@@ -21,18 +21,22 @@ pub struct Arguments {
 #[derive(Subcommand, Clone, Debug)]
 pub enum SubCommand {
     /// Enter Spells API
-    RandomSpell(RandomSpellArgs),
+    Spell(SpellArgs),
     /// Enter Dice API
-    DiceRoll(DiceRollArgs),
+    Dice(DiceArgs),
 }
 
 #[derive(Args, Clone, Debug)]
-/// Get random spell
-pub struct RandomSpellArgs {
+/// Get random spell unless name is specified
+pub struct SpellArgs {
+    #[clap(short, long, takes_value(false), help = "Get random spell")]
+    pub random: bool,
+    #[clap(short, long, help = "Get spell by name")]
+    name: Option<String>,
     #[clap(
         short,
         long,
-        help = "Level of spell (by default this is maximum level, get exact with -e, minimum with -m)"
+        help = "Level of spell (by default this is maximum level, get exact with -e)"
     )]
     pub level: Option<f64>,
     #[clap(
@@ -48,7 +52,7 @@ pub struct RandomSpellArgs {
 
 #[derive(Args, Clone, Debug)]
 /// Roll some dice
-pub struct DiceRollArgs {
+pub struct DiceArgs {
     #[clap(
         value_delimiter = ' ',
         help = "Space-separated list of dice (e.g. 1d20+2 1d3)"
@@ -58,8 +62,8 @@ pub struct DiceRollArgs {
 
 pub struct MainCli<R, D>
 where
-    R: RandomSpellInterface,
-    D: DiceRollInterface,
+    R: SpellInterface,
+    D: DiceInterface,
 {
     random_spell_usecase: R,
     dice_roll_usecase: D,
@@ -68,8 +72,8 @@ where
 
 impl<R, D> MainCli<R, D>
 where
-    R: RandomSpellInterface,
-    D: DiceRollInterface,
+    R: SpellInterface,
+    D: DiceInterface,
 {
     pub fn new(random_spell_usecase: R, dice_roll_usecase: D) -> Self {
         MainCli {
@@ -80,20 +84,46 @@ where
     }
     pub fn run(&mut self) -> Result<(), CliError> {
         match self.args.cmd.clone() {
-            SubCommand::RandomSpell(args) => self.handle_random_spell_cmd(&args),
-            SubCommand::DiceRoll(args) => self.handle_dice_roll_cmd(&args),
+            SubCommand::Spell(args) => self.handle_spell_cmd(&args),
+            SubCommand::Dice(args) => self.handle_dice_cmd(&args),
         }
     }
 
-    pub fn handle_random_spell_cmd(&mut self, args: &RandomSpellArgs) -> Result<(), CliError> {
-        let spell = self
-            .random_spell_usecase
-            .get_random_spell(args.level, args.classes.to_vec(), args.exact_level)
-            .unwrap();
-        println!("{}", spell);
+    pub fn handle_spell_cmd(&mut self, args: &SpellArgs) -> Result<(), CliError> {
+        match args.name.clone() {
+            Some(name) => {
+                let spell = self
+                    .random_spell_usecase
+                    .get_spell_by_name(name)
+                    .map_err(CliError::Spell)?;
+                println!("{}", spell);
+            }
+            None => {
+                if args.random {
+                    let spell = self
+                        .random_spell_usecase
+                        .get_random_spell(args.level, args.classes.to_vec(), args.exact_level)
+                        .map_err(CliError::Spell)?;
+                    println!("{}", spell);
+                } else {
+                    let spells = self
+                        .random_spell_usecase
+                        .get_all_spells_with_filters(
+                            args.level,
+                            args.classes.to_vec(),
+                            args.exact_level,
+                        )
+                        .map_err(CliError::Spell)?;
+                    for spell in spells {
+                        println!("{}", spell);
+                    }
+                }
+            }
+        }
+
         Ok(())
     }
-    pub fn handle_dice_roll_cmd(&mut self, args: &DiceRollArgs) -> Result<(), CliError> {
+    pub fn handle_dice_cmd(&mut self, args: &DiceArgs) -> Result<(), CliError> {
         let dice_set = self
             .dice_roll_usecase
             .roll(args.dice_sets.to_vec())
