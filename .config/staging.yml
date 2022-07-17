@@ -1,0 +1,5 @@
+debug: true
+
+spell_settings:
+  spell_datasource:
+    cache_time: 10000

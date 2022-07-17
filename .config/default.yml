@@ -1,0 +1,7 @@
+spell_settings:
+  spell_api:
+    url: https://www.dnd5eapi.co/graphql
+
+  spell_datasource:
+    remote_type: graphql
+    cache_time: 1000
