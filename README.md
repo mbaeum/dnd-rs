@@ -46,26 +46,26 @@ OPTIONS:
 ### Usage Examples (local only at the moment)
 1. Get any random spell
 ```bash
-cargo run -- random-spell
+cargo run -- spell -r
 ```
 2. Get random spell for class(es)
 
 ```bash
-cargo run -- random-spell -c bard,wizard
+cargo run -- spell -r -c bard,wizard
 ```
 3. Get random spell for for level (upper limit)
 
 ```bash
-cargo run -- random-spell -l 2
+cargo run -- spell -r -l 2
 ```
 4. Get random spell for for level (exact)
 
 ```bash
-cargo run -- random-spell -l 2 -e
+cargo run -- spell -r -l 2 -e
 ```
 5. Roll a list of dice
 ```bash
-cargo run -- dice-roll 2d20 1d6+3
+cargo run -- dice 2d20 1d6+3
 ```
 
 ## Contributing

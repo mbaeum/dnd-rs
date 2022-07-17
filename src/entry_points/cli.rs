@@ -10,7 +10,7 @@ pub enum CliError {
     Dice(DiceError),
 }
 
-/// CLI for D&D 5e shenanigans
+/// CLI for fetching spells and rolling dice.
 #[derive(Parser, Debug)]
 #[clap(version)]
 pub struct Arguments {
