@@ -1,10 +1,8 @@
-use random_spells_cli::core::{
-    usecase::dice::DiceImplementation, usecase::spell::SpellImplementation,
-};
-use random_spells_cli::datasources::{
+use dnd::core::{usecase::dice::DiceImplementation, usecase::spell::SpellImplementation};
+use dnd::datasources::{
     common::remote_datasource::GraphQLAPI, spells::spells_datasource::SpellsGraphQLDataSource,
 };
-use random_spells_cli::entry_points::cli::MainCli;
+use dnd::entry_points::cli::MainCli;
 
 fn setup_random_spell_usecase() -> SpellImplementation<SpellsGraphQLDataSource> {
     let api_url = "https://www.dnd5eapi.co/graphql".to_string();
