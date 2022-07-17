@@ -1,5 +1,5 @@
 # dnd-rs
-[![Rust](https://github.com/mbaeum/random-spells-cli/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/mbaeum/random-spells-cli/actions/workflows/test.yml) 
+[![ci](https://github.com/mbaeum/dnd-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/mbaeum/dnd-rs/actions/workflows/ci.yml) [![release](https://github.com/mbaeum/dnd-rs/actions/workflows/release.yml/badge.svg)](https://github.com/mbaeum/dnd-rs/actions/workflows/release.yml)
 
 A rust lib to get D&amp;D data, inlcuding a clid
 

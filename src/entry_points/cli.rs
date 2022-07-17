@@ -60,22 +60,22 @@ pub struct DiceArgs {
     pub dice_sets: Vec<String>,
 }
 
-pub struct MainCli<R, D>
+pub struct MainCli<S, D>
 where
-    R: SpellInterface,
+    S: SpellInterface,
     D: DiceInterface,
 {
-    random_spell_usecase: R,
+    random_spell_usecase: S,
     dice_roll_usecase: D,
     args: Arguments,
 }
 
-impl<R, D> MainCli<R, D>
+impl<S, D> MainCli<S, D>
 where
-    R: SpellInterface,
+    S: SpellInterface,
     D: DiceInterface,
 {
-    pub fn new(random_spell_usecase: R, dice_roll_usecase: D) -> Self {
+    pub fn new(random_spell_usecase: S, dice_roll_usecase: D) -> Self {
         MainCli {
             random_spell_usecase,
             dice_roll_usecase,

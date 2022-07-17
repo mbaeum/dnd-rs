@@ -11,3 +11,6 @@ Cargo.lock
 
 # GraphQL compiled
 queries/**/**.rs
+
+# Secrets
+**/*secret*.*

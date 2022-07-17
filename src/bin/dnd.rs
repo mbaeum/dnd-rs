@@ -1,23 +1,12 @@
-use dnd::core::{usecase::dice::DiceImplementation, usecase::spell::SpellImplementation};
-use dnd::datasources::{
-    common::remote_datasource::GraphQLAPI, spells::spells_datasource::SpellsGraphQLDataSource,
-};
+use dnd::config::{handler::SettingsHandler, settings::Settings};
 use dnd::entry_points::cli::MainCli;
-
-fn setup_random_spell_usecase() -> SpellImplementation<SpellsGraphQLDataSource> {
-    let api_url = "https://www.dnd5eapi.co/graphql".to_string();
-    let api = GraphQLAPI::new(api_url);
-    let datasource = SpellsGraphQLDataSource::new(api);
-    let cache_time = Some(1000);
-    SpellImplementation::<SpellsGraphQLDataSource>::new(datasource, cache_time)
-}
-
-fn setup_dice_roll_usecase() -> DiceImplementation {
-    DiceImplementation::new()
-}
 
 #[tokio::main]
 async fn main() {
-    let mut cli = MainCli::new(setup_random_spell_usecase(), setup_dice_roll_usecase());
+    let settings_handler = SettingsHandler::new(Settings::new().unwrap());
+    let spell_usecase = settings_handler.setup_spell_usecase();
+    let dice_usecase = settings_handler.setup_dice_usecase();
+
+    let mut cli = MainCli::new(spell_usecase, dice_usecase);
     cli.run().unwrap();
 }
