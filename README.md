@@ -1,43 +1,46 @@
-# random-spells-cli
+# dnd-rs
 [![Rust](https://github.com/mbaeum/random-spells-cli/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/mbaeum/random-spells-cli/actions/workflows/test.yml) 
 
-A rust cli to get random D&amp;D spells
+A rust lib to get D&amp;D data, inlcuding a clid
 
 
-## Usage
+## Usage (CLI)
 ```bash
 USAGE:
-    random-spells-cli <SUBCOMMAND>
+    dnd <SUBCOMMAND>
 
 OPTIONS:
     -h, --help       Print help information
     -V, --version    Print version information
 
 SUBCOMMANDS:
-    dice-roll       Enter Dice API
-    help            Print this message or the help of the given subcommand(s)
-    random-spell    Enter Spells API
+    dice     Enter Dice API
+    help     Print this message or the help of the given subcommand(s)
+    spell    Enter Spells API
 ```
 
 ```bash
 USAGE:
-    random-spells-cli random-spell [OPTIONS]
+    dnd spell [OPTIONS]
 
 OPTIONS:
     -c, --classes <CLASSES>    Comma-separated list of classes
     -e, --exact-level          Get spells for exact <LEVEL>
     -h, --help                 Print help information
-    -l, --level <LEVEL>        Level of spell (by default this is maximum level, get exact with -e,
-                               minimum with -m)
+    -l, --level <LEVEL>        Level of spell (by default this is maximum level, get exact with -e)
+    -n, --name <NAME>          Get spell by name
+    -r, --random               Get random spell
 ```
 
 ```bash
 USAGE:
-    random-spells-cli dice-roll [OPTIONS]
+    dnd dice [DICE_SETS]...
+
+ARGS:
+    <DICE_SETS>...    Space-separated list of dice (e.g. 1d20+2 1d3)
 
 OPTIONS:
-    -d, --dice-sets <DICE_SETS>    Comma-separated list of dice (e.g. 1d20+2)
-    -h, --help                     Print help information
+    -h, --help    Print help information
 ```
 
 ### Usage Examples (local only at the moment)

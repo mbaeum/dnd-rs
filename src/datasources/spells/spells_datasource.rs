@@ -1,4 +1,4 @@
-use crate::core::usecase::random_spell::{SpellsDataSourceError, SpellsDataSourceInterface};
+use crate::core::usecase::spell::{SpellsDataSourceError, SpellsDataSourceInterface};
 use crate::datasources::common::remote_datasource::GraphQLAPI;
 use crate::datasources::queries::spells_query::spells_query::{
     ResponseData, SpellsQuerySpells, Variables,
