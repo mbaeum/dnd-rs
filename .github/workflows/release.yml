@@ -8,7 +8,7 @@ jobs:
   create-release:
     name: create-release
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main'
 
     steps:
       - name: Get the version
