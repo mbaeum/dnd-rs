@@ -1,5 +1,5 @@
 [build]
-target = "frontend/index.html"
+target = "ui/index.html"
 
 [serve]
 address = "127.0.0.1"

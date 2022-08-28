@@ -58,26 +58,26 @@ OPTIONS:
 ### Usage Examples (local only at the moment)
 1. Get any random spell
 ```bash
-cargo run -- spell -r
+cargo run -p cli -- spell -r
 ```
 2. Get random spell for class(es)
 
 ```bash
-cargo run -- spell -r -c bard,wizard
+cargo run -p cli -- spell -r -c bard,wizard
 ```
 3. Get random spell for for level (upper limit)
 
 ```bash
-cargo run -- spell -r -l 2
+cargo run -p cli -- spell -r -l 2
 ```
 4. Get random spell for for level (exact)
 
 ```bash
-cargo run -- spell -r -l 2 -e
+cargo run -p cli -- spell -r -l 2 -e
 ```
 5. Roll a list of dice
 ```bash
-cargo run -- dice 2d20 1d6+3
+cargo run -p cli -- dice 2d20 1d6+3
 ```
 
 ## Contributing
