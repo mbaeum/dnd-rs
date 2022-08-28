@@ -1,0 +1,8 @@
+[package]
+name = "dnd-ui"
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+web-sys = "0.3.59"
+yew = "0.19"

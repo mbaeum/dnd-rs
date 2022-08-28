@@ -3,6 +3,18 @@
 
 A rust lib to get D&amp;D data, inlcuding a clid
 
+## Usage (Web App)
+Run
+```bash
+trunk serve
+```
+and go to [localhost](localhost:8080)
+### Prerequisites
+```bash
+rustup target add wasm32-unknown-unknown
+cargo install trunk
+cargo install wasm-bindgen-cli
+```
 
 ## Usage (CLI)
 ```bash
