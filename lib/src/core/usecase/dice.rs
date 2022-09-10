@@ -3,7 +3,7 @@ use crate::core::entity::dice_set::{Dice, DiceSet};
 use std::num::ParseIntError;
 use std::string::String;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum DiceError {
     ParseDiceCountError(ParseIntError),
     ParseFaceError(ParseIntError),

@@ -3,7 +3,7 @@ use self::spells_query::SpellsQuerySpellsClasses;
 
 use graphql_client::GraphQLQuery;
 
-#[derive(GraphQLQuery, PartialEq)]
+#[derive(GraphQLQuery, PartialEq, Eq)]
 #[graphql(
     query_path = "../queries/spells/spells_query.graphql",
     schema_path = "../queries/spells/schema.graphql",
