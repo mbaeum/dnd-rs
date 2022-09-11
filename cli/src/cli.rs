@@ -2,6 +2,8 @@ use clap::{Args, Parser, Subcommand};
 use lib::core::usecase::dice::DiceInterface;
 use lib::core::usecase::spell::{SpellError, SpellInterface};
 
+use crate::entity::{dice_set::CliDisplayDiceSet, spell::CliDisplaySpell};
+
 #[derive(Debug)]
 pub enum CliError {
     Spell(SpellError),
@@ -96,7 +98,7 @@ where
                     .random_spell_usecase
                     .get_spell_by_name(name)
                     .map_err(CliError::Spell)?;
-                println!("{}", spell);
+                println!("{}", CliDisplaySpell::new(&spell));
             }
             None => {
                 if args.random {
@@ -104,7 +106,7 @@ where
                         .random_spell_usecase
                         .get_random_spell(args.level, args.classes.to_vec(), args.exact_level)
                         .map_err(CliError::Spell)?;
-                    println!("{}", spell);
+                    println!("{}", CliDisplaySpell::new(&spell));
                 } else {
                     let spells = self
                         .random_spell_usecase
@@ -115,7 +117,7 @@ where
                         )
                         .map_err(CliError::Spell)?;
                     for spell in spells {
-                        println!("{}", spell);
+                        println!("{}", CliDisplaySpell::new(&spell));
                     }
                 }
             }
@@ -128,7 +130,7 @@ where
             .dice_roll_usecase
             .roll(args.dice_sets.to_vec())
             .unwrap();
-        println!("{}", dice_set);
+        println!("{}", CliDisplayDiceSet::new(&dice_set));
         Ok(())
     }
 }
