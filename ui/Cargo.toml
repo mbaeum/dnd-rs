@@ -4,5 +4,9 @@ version = "0.0.0"
 edition = "2021"
 
 [dependencies]
+getrandom = { version = "0.2", features = ["js"] }
+lib = { path = "../lib" }
 web-sys = "0.3.59"
 yew = "0.19"
+console_log = { version = "0.2", features = ["color"] }
+log = "0.4"

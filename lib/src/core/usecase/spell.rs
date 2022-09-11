@@ -1,5 +1,4 @@
 use crate::core::entity::spell::Spell;
-use crate::datasources::common::local_datasource::LocalDatasource;
 use crate::datasources::common::remote_datasource::APIError;
 use crate::datasources::queries::spells_query::spells_query::SpellsQuerySpells;
 use rand::prelude::SliceRandom;
@@ -50,19 +49,20 @@ where
     T: SpellsDataSourceInterface,
 {
     datasource: T,
-    local_datasource: LocalDatasource<SpellsQuerySpells>,
+    // local_datasource: LocalDatasource<SpellsQuerySpells>,
 }
 
 impl<T> SpellImplementation<T>
 where
     T: SpellsDataSourceInterface,
 {
-    pub fn new(datasource: T, cache_time: Option<u64>) -> Self {
-        let cache_time = cache_time.unwrap_or(1000);
-        let local_datasource = LocalDatasource::<SpellsQuerySpells>::new(2, cache_time);
+    pub fn new(datasource: T, // , cache_time: Option<u64>
+    ) -> Self {
+        // let cache_time = cache_time.unwrap_or(1000);
+        // let local_datasource = LocalDatasource::<SpellsQuerySpells>::new(2, cache_time);
         SpellImplementation {
             datasource,
-            local_datasource,
+            // local_datasource,
         }
     }
 
@@ -73,39 +73,39 @@ where
         }
     }
 
-    fn get_spells_from_recent_local_datasource(
-        &mut self,
-    ) -> Result<Vec<SpellsQuerySpells>, SpellError> {
-        match self.local_datasource.get_recent(0) {
-            Some(spells) => Ok(spells.to_vec()),
-            None => Err(SpellError::LocalDataSourceError(
-                LocalSpellsDataSourceError::RecentCacheEmpty,
-            )),
-        }
-    }
+    // fn get_spells_from_recent_local_datasource(
+    //     &mut self,
+    // ) -> Result<Vec<SpellsQuerySpells>, SpellError> {
+    //     match self.local_datasource.get_recent(0) {
+    //         Some(spells) => Ok(spells.to_vec()),
+    //         None => Err(SpellError::LocalDataSourceError(
+    //             LocalSpellsDataSourceError::RecentCacheEmpty,
+    //         )),
+    //     }
+    // }
 
-    fn cache_spells(&mut self, spells: Vec<SpellsQuerySpells>) {
-        self.local_datasource.insert(spells, 0);
-    }
+    // fn cache_spells(&mut self, spells: Vec<SpellsQuerySpells>) {
+    //     self.local_datasource.insert(spells, 0);
+    // }
 
     fn get_all_spells(&mut self) -> Result<Vec<SpellsQuerySpells>, SpellError> {
-        match self.get_spells_from_recent_local_datasource() {
-            Ok(spells) => Ok(spells),
-            Err(err) => match err {
-                SpellError::LocalDataSourceError(LocalSpellsDataSourceError::RecentCacheEmpty) => {
-                    match self.get_spells_from_datasource() {
-                        Ok(spells) => {
-                            let cache_spells = spells.to_vec();
-                            self.cache_spells(cache_spells);
-                            Ok(spells)
-                        }
-                        Err(err) => Err(err),
-                    }
-                }
-                _ => Err(err),
-            },
+        // match self.get_spells_from_recent_local_datasource() {
+        //     Ok(spells) => Ok(spells),
+        //     Err(err) => match err {
+        //         SpellError::LocalDataSourceError(LocalSpellsDataSourceError::RecentCacheEmpty) => {
+        match self.get_spells_from_datasource() {
+            Ok(spells) => {
+                // let cache_spells = spells.to_vec();
+                // self.cache_spells(cache_spells);
+                Ok(spells)
+            }
+            Err(err) => Err(err),
         }
     }
+    //             _ => Err(err),
+    //         },
+    //     }
+    // }
 
     fn filter_spell_for_classes(&self, spell: &SpellsQuerySpells, classes: &[String]) -> bool {
         if classes.is_empty() {

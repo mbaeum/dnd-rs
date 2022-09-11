@@ -5,29 +5,29 @@ use std::env;
 
 #[derive(Debug, Deserialize)]
 #[allow(dead_code)]
-pub(super) struct SpellApi {
-    pub(super) url: String,
+pub struct SpellApi {
+    pub url: String,
 }
 
 #[derive(Debug, Deserialize)]
 #[allow(dead_code)]
-pub(super) struct SpellDatasource {
-    pub(super) remote_type: String,
-    pub(super) cache_time: u64,
+pub struct SpellDatasource {
+    pub remote_type: String,
+    pub cache_time: u64,
 }
 
 #[derive(Debug, Deserialize)]
 #[allow(dead_code)]
-pub(super) struct SpellSettings {
-    pub(super) spell_api: SpellApi,
-    pub(super) spell_datasource: SpellDatasource,
+pub struct SpellSettings {
+    pub spell_api: SpellApi,
+    pub spell_datasource: SpellDatasource,
 }
 
 #[derive(Debug, Deserialize)]
 #[allow(dead_code)]
 pub struct Settings {
-    pub(super) debug: bool,
-    pub(super) spell_settings: SpellSettings,
+    pub debug: bool,
+    pub spell_settings: SpellSettings,
 }
 
 impl Settings {
