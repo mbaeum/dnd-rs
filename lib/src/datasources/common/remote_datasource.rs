@@ -1,4 +1,5 @@
 use graphql_client::{Error as GraphQLError, GraphQLQuery, Response};
+use log;
 use reqwest;
 use reqwest::{Error as ReqwestError, StatusCode};
 use serde::{Deserialize, Serialize};
@@ -17,6 +18,8 @@ pub struct GraphQLAPI {
 
 impl GraphQLAPI {
     pub fn new(api_url: String) -> Self {
+        log::debug!("Routing API calls to '{}'", api_url);
+
         Self { api_url }
     }
     pub async fn get_response_data<
@@ -29,10 +32,16 @@ impl GraphQLAPI {
     ) -> Result<Query::ResponseData, APIError> {
         let client = reqwest::Client::new();
         let request_body = <Query>::build_query(variables);
+
+        log::debug!("Sending request: {}", request_body.query);
+
         let response = match client.post(&self.api_url).json(&request_body).send().await {
             Ok(res) => res,
             Err(err) => return Err(APIError::Reqwest(err)),
         };
+
+        log::debug!("Got response: {:?}", response);
+
         let status = response.status();
         let canonical_reason = status.canonical_reason().unwrap_or("Unknown").to_string();
         if status != StatusCode::OK {
