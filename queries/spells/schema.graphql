@@ -6,7 +6,6 @@ type Spell {
     name: String
     level: Float!
     desc: [String]
-    url: String
     index: String
     classes: [AbilityScoreSkills]
 }

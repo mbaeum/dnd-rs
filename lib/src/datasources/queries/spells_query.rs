@@ -25,7 +25,6 @@ impl Clone for SpellsQuerySpells {
             name: self.name.clone(),
             level: self.level,
             desc: self.desc.clone(),
-            url: self.url.clone(),
             index: self.index.clone(),
             classes: self.classes.clone(),
         }

@@ -73,17 +73,6 @@ where
         }
     }
 
-    // fn get_spells_from_local_datasource(
-    //     &mut self,
-    // ) -> Result<Vec<SpellsQuerySpells>, RandomSpellError> {
-    //     match self.local_datasource.get(0) {
-    //         Some(spells) => Ok(spells.to_vec()),
-    //         None => Err(RandomSpellError::LocalDataSourceError(
-    //             LocalSpellsDataSourceError::CacheEmpty,
-    //         )),
-    //     }
-    // }
-
     fn get_spells_from_recent_local_datasource(
         &mut self,
     ) -> Result<Vec<SpellsQuerySpells>, SpellError> {
