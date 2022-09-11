@@ -20,6 +20,7 @@ fn test_spell_by_class() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+#[ignore]
 #[test]
 fn test_spell_by_level() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = common::get_cli_command(None, None);
