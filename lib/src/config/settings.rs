@@ -31,13 +31,13 @@ pub struct Settings {
 }
 
 impl Settings {
-    pub fn new() -> Result<Self, ConfigError> {
+    pub fn new(folder_path: &String) -> Result<Self, ConfigError> {
         let environment = env::var("ENV").unwrap_or_else(|_| "staging".into());
         let fmt = FileFormat::Yaml;
         let s = Config::builder()
-            .add_source(File::new(".config/default", fmt).required(true))
-            .add_source(File::new(&format!(".config/{}", environment), fmt).required(false))
-            .add_source(File::new(".config/secret", fmt).required(false))
+            .add_source(File::new(&format!("{}/default", folder_path), fmt).required(true))
+            .add_source(File::new(&format!("{}/{}", folder_path, environment), fmt).required(false))
+            .add_source(File::new(&format!("{}/secret", folder_path), fmt).required(false))
             .build()?;
 
         s.try_deserialize()

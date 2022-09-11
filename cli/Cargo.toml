@@ -10,3 +10,7 @@ default-run = "cli"
 clap = { version = "3.2.11", features = ["derive"] }
 lib = { path = "../lib" }
 tokio = { version = "1", features = ["full"] }
+
+[dev-dependencies]
+assert_cmd = "2.0"
+predicates = "2.1"
