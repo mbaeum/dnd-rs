@@ -10,7 +10,6 @@ config = { version = "0.13.1", features = ["yaml"] }
 futures = { version = "0.3.*" }
 graphql_client = { version = "0.11.0", features = ["reqwest"] }
 log = "0.4"
-lru_time_cache = "0.11.11"
 rand = "0.8.4"
 reqwest = { version = "^0.11", features = ["json", "blocking"] }
 serde = { version = "1.0", features = ["derive"] }

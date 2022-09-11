@@ -45,9 +45,6 @@ impl SettingsHandler {
         debug!("Setting up SpellsGraphQLDataSource");
         let api = GraphQLAPI::new(settings.spell_settings.spell_api.url.clone());
         let datasource = SpellsGraphQLDataSource::new(api);
-        SpellImplementation::<SpellsGraphQLDataSource>::new(
-            datasource,
-            // Some(settings.spell_settings.spell_datasource.cache_time),
-        )
+        SpellImplementation::<SpellsGraphQLDataSource>::new(datasource)
     }
 }
