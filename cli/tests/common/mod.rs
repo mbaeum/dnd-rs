@@ -32,7 +32,7 @@ pub fn assert_failure_contains(
     pattern: &str,
 ) -> Result<(), CommandAssertionFailure> {
     match cmd.assert().try_failure() {
-        Ok(a) => match a.try_stderr(predicate::str::contains(pattern)) {
+        Ok(a) => match a.try_stderr(predicate::str::is_match(pattern).unwrap()) {
             Ok(_) => Ok(()),
             Err(_) => Err(CommandAssertionFailure::FailNotInStdErr),
         },
@@ -45,7 +45,7 @@ pub fn assert_success_contains(
     pattern: &str,
 ) -> Result<(), CommandAssertionFailure> {
     match cmd.assert().try_success() {
-        Ok(a) => match a.try_stdout(predicate::str::contains(pattern)) {
+        Ok(a) => match a.try_stdout(predicate::str::is_match(pattern).unwrap()) {
             Ok(_) => Ok(()),
             Err(_) => Err(CommandAssertionFailure::SuccessNotInStdOut),
         },

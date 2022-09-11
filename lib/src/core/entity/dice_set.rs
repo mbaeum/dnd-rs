@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::fmt::{Display, Formatter, Result as FmtResult};
+// use std::fmt::{Display, Formatter, Result as FmtResult};
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub struct Dice {
@@ -53,26 +53,6 @@ impl DiceSet {
         }
         self.dice_map = result_map;
         self.result = self.dice_map.values().sum();
-    }
-}
-
-impl Display for Dice {
-    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        write!(f, "{}d{}", self.dice_count, self.face)?;
-        if self.modifier.is_some() {
-            write!(f, "+{}", self.modifier.unwrap())?;
-        }
-        Ok(())
-    }
-}
-
-impl Display for DiceSet {
-    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        writeln!(f, "Total: \t\t{}", self.result)?;
-        for (dice, result) in &self.dice_map {
-            writeln!(f, "|---{}: \t{}", dice, result)?;
-        }
-        Ok(())
     }
 }
 
