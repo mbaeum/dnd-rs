@@ -2,9 +2,12 @@ mod cli;
 use cli::MainCli;
 use lib::config::{handler::SettingsHandler, settings::Settings};
 
+use std::env;
+
 #[tokio::main]
 async fn main() {
-    let settings_handler = SettingsHandler::new(Settings::new().unwrap());
+    let folder_path = env::var("DND_SETTINGS_DIR").unwrap_or_else(|_| ".config".into());
+    let settings_handler = SettingsHandler::new(Settings::new(&folder_path).unwrap());
     let spell_usecase = settings_handler.setup_spell_usecase();
     let dice_usecase = settings_handler.setup_dice_usecase();
 
