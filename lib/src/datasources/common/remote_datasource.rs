@@ -33,11 +33,17 @@ impl GraphQLAPI {
         let client = reqwest::Client::new();
         let request_body = <Query>::build_query(variables);
 
-        log::debug!("Sending request: {}", request_body.query);
+        log::debug!("Query Body: {}", request_body.query);
 
-        let response = match client.post(&self.api_url).json(&request_body).send().await {
+        let request_builder = client.post(&self.api_url).json(&request_body);
+        log::debug!("Built Request: {request_builder:?}");
+
+        let response = match request_builder.send().await {
             Ok(res) => res,
-            Err(err) => return Err(APIError::Reqwest(err)),
+            Err(err) => {
+                log::error!("{err}");
+                return Err(APIError::Reqwest(err));
+            }
         };
 
         log::debug!("Got response: {:?}", response);

@@ -4,7 +4,6 @@ use lib::config::{handler::SettingsHandler, settings::Settings};
 
 use std::env;
 
-// mod entity;
 mod entity {
     pub mod dice_set;
     pub mod spell;
