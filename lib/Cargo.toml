@@ -6,11 +6,15 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+async-trait = "0.1.57"
 config = { version = "0.13.1", features = ["yaml"] }
 futures = { version = "0.3.*" }
 graphql_client = { version = "0.11.0", features = ["reqwest"] }
 log = "0.4"
 rand = "0.8.4"
-reqwest = { version = "^0.11", features = ["json", "blocking"] }
+reqwest = { version = "^0.11", features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+
+[dev-dependencies]
+reqwest = { version = "^0.11", features = ["json", "blocking"] }

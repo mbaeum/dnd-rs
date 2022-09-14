@@ -1,6 +1,7 @@
 use crate::core::entity::spell::Spell;
 use crate::datasources::common::remote_datasource::APIError;
 use crate::datasources::queries::spells_query::spells_query::SpellsQuerySpells;
+use async_trait::async_trait;
 use rand::prelude::SliceRandom;
 
 #[derive(Debug)]
@@ -9,8 +10,9 @@ pub enum SpellsDataSourceError {
     NoSpellsFound,
 }
 
+#[async_trait(?Send)]
 pub trait SpellsDataSourceInterface {
-    fn get_all_spells(&self) -> Result<Vec<SpellsQuerySpells>, SpellsDataSourceError>;
+    async fn get_all_spells(&self) -> Result<Vec<SpellsQuerySpells>, SpellsDataSourceError>;
 }
 
 #[derive(Debug)]
@@ -25,18 +27,18 @@ pub enum SpellError {
     DataSourceError(SpellsDataSourceError),
     LocalDataSourceError(LocalSpellsDataSourceError),
 }
-
+#[async_trait(?Send)]
 pub trait SpellInterface {
-    fn get_random_spell(
+    async fn get_random_spell(
         &mut self,
         level: Option<f64>,
         classes: Vec<String>,
         exact_level: bool,
     ) -> Result<Spell, SpellError>;
 
-    fn get_spell_by_name(&mut self, name: String) -> Result<Spell, SpellError>;
+    async fn get_spell_by_name(&mut self, name: String) -> Result<Spell, SpellError>;
 
-    fn get_all_spells_with_filters(
+    async fn get_all_spells_with_filters(
         &mut self,
         level: Option<f64>,
         classes: Vec<String>,
@@ -59,15 +61,15 @@ where
         SpellImplementation { datasource }
     }
 
-    fn get_spells_from_datasource(&self) -> Result<Vec<SpellsQuerySpells>, SpellError> {
-        match self.datasource.get_all_spells() {
+    async fn get_spells_from_datasource(&self) -> Result<Vec<SpellsQuerySpells>, SpellError> {
+        match self.datasource.get_all_spells().await {
             Ok(spells) => Ok(spells),
             Err(err) => Err(SpellError::DataSourceError(err)),
         }
     }
 
-    fn get_all_spells(&mut self) -> Result<Vec<SpellsQuerySpells>, SpellError> {
-        match self.get_spells_from_datasource() {
+    async fn get_all_spells(&mut self) -> Result<Vec<SpellsQuerySpells>, SpellError> {
+        match self.get_spells_from_datasource().await {
             Ok(spells) => Ok(spells),
             Err(err) => Err(err),
         }
@@ -171,17 +173,18 @@ where
     }
 }
 
+#[async_trait(?Send)]
 impl<T> SpellInterface for SpellImplementation<T>
 where
-    T: SpellsDataSourceInterface,
+    T: SpellsDataSourceInterface + std::marker::Sync + std::marker::Send,
 {
-    fn get_random_spell(
+    async fn get_random_spell(
         &mut self,
         level: Option<f64>,
         classes: Vec<String>,
         exact_level: bool,
     ) -> Result<Spell, SpellError> {
-        let spells = self.get_all_spells()?;
+        let spells = self.get_all_spells().await?;
         let filtered_spells = self.filter_spells(spells, level, classes, exact_level)?;
         match self.get_random_spell(filtered_spells) {
             Ok(spell) => Ok(self.spell_from_spells_query_spells(&spell)),
@@ -189,13 +192,14 @@ where
         }
     }
 
-    fn get_spell_by_name(&mut self, name: String) -> Result<Spell, SpellError> {
+    async fn get_spell_by_name(&mut self, name: String) -> Result<Spell, SpellError> {
         let name = name.to_lowercase().trim().to_string();
-        let spells = self.get_all_spells()?;
+        let spells = self.get_all_spells().await?;
         let filtered_spells = spells
             .into_iter()
             .filter(|spell| {
                 *spell
+                    .clone()
                     .name
                     .as_ref()
                     .unwrap_or(&"".to_string())
@@ -217,13 +221,15 @@ where
         }
     }
 
-    fn get_all_spells_with_filters(
+    async fn get_all_spells_with_filters(
         &mut self,
         level: Option<f64>,
         classes: Vec<String>,
         exact_level: bool,
     ) -> Result<Vec<Spell>, SpellError> {
-        let spells = self.get_all_spells()?;
+        // let spells = self.get_all_spells().await?;
+        let spells = self.get_all_spells().await?;
+        // let spells = spells;
         let filtered_spells = self.filter_spells(spells, level, classes, exact_level)?;
         match filtered_spells {
             f if f.is_empty() => Err(SpellError::NoSpellsFound),

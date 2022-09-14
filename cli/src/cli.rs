@@ -84,19 +84,20 @@ where
             args: Arguments::parse(),
         }
     }
-    pub fn run(&mut self) -> Result<(), CliError> {
+    pub async fn run(&mut self) -> Result<(), CliError> {
         match self.args.cmd.clone() {
-            SubCommand::Spell(args) => self.handle_spell_cmd(&args),
+            SubCommand::Spell(args) => self.handle_spell_cmd(&args).await,
             SubCommand::Dice(args) => self.handle_dice_cmd(&args),
         }
     }
 
-    pub fn handle_spell_cmd(&mut self, args: &SpellArgs) -> Result<(), CliError> {
+    pub async fn handle_spell_cmd(&mut self, args: &SpellArgs) -> Result<(), CliError> {
         match args.name.clone() {
             Some(name) => {
                 let spell = self
                     .random_spell_usecase
                     .get_spell_by_name(name)
+                    .await
                     .map_err(CliError::Spell)?;
                 println!("{}", CliDisplaySpell::new(&spell));
             }
@@ -105,6 +106,7 @@ where
                     let spell = self
                         .random_spell_usecase
                         .get_random_spell(args.level, args.classes.to_vec(), args.exact_level)
+                        .await
                         .map_err(CliError::Spell)?;
                     println!("{}", CliDisplaySpell::new(&spell));
                 } else {
@@ -115,6 +117,7 @@ where
                             args.classes.to_vec(),
                             args.exact_level,
                         )
+                        .await
                         .map_err(CliError::Spell)?;
                     for spell in spells {
                         println!("{}", CliDisplaySpell::new(&spell));
