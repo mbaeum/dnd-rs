@@ -26,7 +26,7 @@ fn test_spell_by_level() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = common::get_cli_command(None, None);
 
     cmd.arg("spell").args(&["-r", "-l", "2"]);
-    let pattern = "Level:\n\t[1,2]";
+    let pattern = r"Level:[\n,\r,\s,\t]+[1,2]";
     common::assert_success_contains(cmd, pattern).unwrap();
 
     Ok(())
