@@ -5,7 +5,7 @@ use crate::datasources::queries::spells_query::spells_query::{
 };
 use crate::datasources::queries::spells_query::SpellsQuery;
 // use crate::datasources::queries::spells_query;
-use futures::executor::block_on;
+use async_trait::async_trait;
 
 pub struct SpellsGraphQLDataSource {
     api: GraphQLAPI,
@@ -33,9 +33,10 @@ impl SpellsGraphQLDataSource {
     }
 }
 
+#[async_trait(?Send)]
 impl SpellsDataSourceInterface for SpellsGraphQLDataSource {
-    fn get_all_spells(&self) -> Result<Vec<SpellsQuerySpells>, SpellsDataSourceError> {
-        let data = block_on(self.get_all_raw_spells());
+    async fn get_all_spells(&self) -> Result<Vec<SpellsQuerySpells>, SpellsDataSourceError> {
+        let data = self.get_all_raw_spells().await;
         let spells = data?.spells;
         Ok(spells)
     }
@@ -43,6 +44,8 @@ impl SpellsDataSourceInterface for SpellsGraphQLDataSource {
 
 #[cfg(test)]
 mod tests {
+    use futures::executor::block_on;
+
     use super::*;
 
     fn data_source() -> SpellsGraphQLDataSource {

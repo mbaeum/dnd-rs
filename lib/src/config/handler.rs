@@ -6,6 +6,8 @@ use crate::datasources::{
 
 use crate::config::settings::Settings;
 
+use log::{debug, error, info};
+
 pub struct SettingsHandler {
     settings: Settings,
 }
@@ -22,8 +24,14 @@ impl SettingsHandler {
             .remote_type
             .clone()
         {
-            x if x == "graphql" => Self::setup_graphql_spell_usecase(&self.settings),
-            _ => panic!("Unknown type"),
+            x if x == "graphql" => {
+                info!("Fetching GraphQL Datasource");
+                Self::setup_graphql_spell_usecase(&self.settings)
+            }
+            _ => {
+                error!("Unknown data source requested!");
+                panic!("Unknown type")
+            }
         }
     }
 
@@ -34,11 +42,9 @@ impl SettingsHandler {
     fn setup_graphql_spell_usecase(
         settings: &Settings,
     ) -> SpellImplementation<SpellsGraphQLDataSource> {
+        debug!("Setting up SpellsGraphQLDataSource");
         let api = GraphQLAPI::new(settings.spell_settings.spell_api.url.clone());
         let datasource = SpellsGraphQLDataSource::new(api);
-        SpellImplementation::<SpellsGraphQLDataSource>::new(
-            datasource,
-            Some(settings.spell_settings.spell_datasource.cache_time),
-        )
+        SpellImplementation::<SpellsGraphQLDataSource>::new(datasource)
     }
 }

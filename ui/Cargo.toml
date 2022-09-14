@@ -4,5 +4,12 @@ version = "0.0.0"
 edition = "2021"
 
 [dependencies]
+getrandom = { version = "0.2", features = ["js"] }
+lib = { path = "../lib" }
+wasm-bindgen-futures = "0.4"
 web-sys = "0.3.59"
-yew = "0.19"
+yew = { version = "0.19.3" }
+# yew = { path = "../../yew/packages/yew", features = ["tokio", "csr"] }
+yew-hooks = "0.1.56"
+console_log = { version = "0.2", features = ["color"] }
+log = "0.4"

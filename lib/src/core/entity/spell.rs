@@ -1,4 +1,5 @@
 // use std::fmt::{Display, Error, Formatter};
+#[derive(Debug, Clone)]
 pub struct Spell {
     pub name: String,
     pub level: f64,

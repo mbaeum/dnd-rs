@@ -1,8 +1,9 @@
+use crate::components::spell_component::SpellComponent;
 use yew::prelude::*;
 
 #[function_component(App)]
 pub fn app() -> Html {
-    let message = String::from("Hello, World!");
+    let message = String::from("Hello, World!!!");
 
     html! {
         <main class="container">
@@ -13,6 +14,7 @@ pub fn app() -> Html {
             </div>
             <div>
                 <h2 class={"heading"}>{message}</h2>
+                <SpellComponent />
             </div>
         </main>
     }

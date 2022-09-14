@@ -4,7 +4,6 @@ use lib::config::{handler::SettingsHandler, settings::Settings};
 
 use std::env;
 
-// mod entity;
 mod entity {
     pub mod dice_set;
     pub mod spell;
@@ -20,5 +19,5 @@ async fn main() {
     let dice_usecase = settings_handler.setup_dice_usecase();
 
     let mut cli = MainCli::new(spell_usecase, dice_usecase);
-    cli.run().unwrap();
+    cli.run().await.unwrap();
 }

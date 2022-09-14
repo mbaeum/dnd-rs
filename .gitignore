@@ -15,5 +15,6 @@ queries/**/**.rs
 # Secrets
 **/*secret*.*
 
+/dist
 */dist
 */target
